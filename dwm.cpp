@@ -3,7 +3,7 @@
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
 struct NumTags {
-    char limitexceeded[LENGTH(tags) > 31 ? -1 : 1];
+    char limitexceeded[LENGTH(TAGS) > 31 ? -1 : 1];
 };
 
 /* function implementations */
@@ -21,8 +21,8 @@ void applyrules(Client *c) {
     cls = ch.res_class ? ch.res_class : broken;
     instance = ch.res_name ? ch.res_name : broken;
 
-    for (i = 0; i < LENGTH(rules); i++) {
-        r = &rules[i];
+    for (i = 0; i < LENGTH(RULES); i++) {
+        r = &RULES[i];
         if ((!r->title || strstr(c->name, r->title)) &&
             (!r->cls || strstr(cls, r->cls)) &&
             (!r->instance || strstr(instance, r->instance))) {
@@ -178,9 +178,9 @@ void buttonpress(XEvent *e) {
     if (ev->window == selmon->barwin) {
         i = x = 0;
         do {
-            x += TEXTW(tags[i]);
-        } while (ev->x >= x && ++i < LENGTH(tags));
-        if (i < LENGTH(tags)) {
+            x += TEXTW(TAGS[i]);
+        } while (ev->x >= x && ++i < LENGTH(TAGS));
+        if (i < LENGTH(TAGS)) {
             click = ClkTagBar;
             arg.ui = 1 << i;
         } else if (ev->x < x + TEXTW(selmon->ltsymbol)) {
@@ -196,13 +196,13 @@ void buttonpress(XEvent *e) {
         XAllowEvents(dpy, ReplayPointer, CurrentTime);
         click = ClkClientWin;
     }
-    for (i = 0; i < LENGTH(buttons); i++) {
-        if (click == buttons[i].click && buttons[i].func &&
-            buttons[i].button == ev->button &&
-            CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state)) {
-            buttons[i].func(click == ClkTagBar && buttons[i].arg.i == 0
+    for (i = 0; i < LENGTH(BUTTONS); i++) {
+        if (click == BUTTONS[i].click && BUTTONS[i].func &&
+            BUTTONS[i].button == ev->button &&
+            CLEANMASK(BUTTONS[i].mask) == CLEANMASK(ev->state)) {
+            BUTTONS[i].func(click == ClkTagBar && BUTTONS[i].arg.i == 0
                                 ? &arg
-                                : &buttons[i].arg);
+                                : &BUTTONS[i].arg);
         }
     }
 }
@@ -236,7 +236,7 @@ void cleanup(void) {
     for (i = 0; i < CurLast; i++) {
         drw_cur_free(drw, cursor[i]);
     }
-    for (i = 0; i < LENGTH(colors); i++) {
+    for (i = 0; i < LENGTH(COLORS); i++) {
         drw_scm_free(drw, scheme[i], 3);
     }
     free(scheme);
@@ -395,9 +395,9 @@ Monitor *createmon(void) {
     m->nmaster = nmaster;
     m->showbar = showbar;
     m->topbar = topbar;
-    m->lt[0] = &layouts[0];
-    m->lt[1] = &layouts[1 % LENGTH(layouts)];
-    strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
+    m->lt[0] = &LAYOUTS[0];
+    m->lt[1] = &LAYOUTS[1 % LENGTH(LAYOUTS)];
+    strncpy(m->ltsymbol, LAYOUTS[0].symbol, sizeof m->ltsymbol);
     return m;
 }
 
@@ -469,12 +469,12 @@ void drawbar(Monitor *m) {
         }
     }
     x = 0;
-    for (i = 0; i < LENGTH(tags); i++) {
-        w = TEXTW(tags[i]);
+    for (i = 0; i < LENGTH(TAGS); i++) {
+        w = TEXTW(TAGS[i]);
         drw_setscheme(
             drw,
             scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
-        drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], urg & 1 << i);
+        drw_text(drw, x, 0, w, bh, lrpad / 2, TAGS[i], urg & 1 << i);
         if (occ & 1 << i) {
             drw_rect(drw, x + boxs, boxs, boxw, boxw,
                      m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
@@ -698,11 +698,11 @@ void grabbuttons(Client *c, int focused) {
             XGrabButton(dpy, AnyButton, AnyModifier, c->win, False, BUTTONMASK,
                         GrabModeSync, GrabModeSync, None, None);
         }
-        for (i = 0; i < LENGTH(buttons); i++) {
-            if (buttons[i].click == ClkClientWin) {
+        for (i = 0; i < LENGTH(BUTTONS); i++) {
+            if (BUTTONS[i].click == ClkClientWin) {
                 for (j = 0; j < LENGTH(modifiers); j++) {
-                    XGrabButton(dpy, buttons[i].button,
-                                buttons[i].mask | modifiers[j], c->win, False,
+                    XGrabButton(dpy, BUTTONS[i].button,
+                                BUTTONS[i].mask | modifiers[j], c->win, False,
                                 BUTTONMASK, GrabModeAsync, GrabModeSync, None,
                                 None);
                 }
@@ -727,11 +727,11 @@ void grabkeys(void) {
             return;
         }
         for (k = start; k <= end; k++) {
-            for (i = 0; i < LENGTH(keys); i++) {
+            for (i = 0; i < LENGTH(KEYS); i++) {
                 /* skip modifier codes, we do that ourselves */
-                if (keys[i].keysym == syms[(k - start) * skip]) {
+                if (KEYS[i].keysym == syms[(k - start) * skip]) {
                     for (j = 0; j < LENGTH(modifiers); j++) {
-                        XGrabKey(dpy, k, keys[i].mod | modifiers[j], root, True,
+                        XGrabKey(dpy, k, KEYS[i].mod | modifiers[j], root, True,
                                  GrabModeAsync, GrabModeAsync);
                     }
                 }
@@ -767,10 +767,10 @@ void keypress(XEvent *e) {
 
     ev = &e->xkey;
     keysym = XkbKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0, 0);
-    for (i = 0; i < LENGTH(keys); i++) {
-        if (keysym == keys[i].keysym &&
-            CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) && keys[i].func) {
-            keys[i].func(&(keys[i].arg));
+    for (i = 0; i < LENGTH(KEYS); i++) {
+        if (keysym == KEYS[i].keysym &&
+            CLEANMASK(KEYS[i].mod) == CLEANMASK(ev->state) && KEYS[i].func) {
+            KEYS[i].func(&(KEYS[i].arg));
         }
     }
 }
@@ -1385,9 +1385,9 @@ void setup(void) {
     cursor[CurResize] = drw_cur_create(drw, XC_sizing);
     cursor[CurMove] = drw_cur_create(drw, XC_fleur);
     /* init appearance */
-    scheme = (XftColor **)ecalloc(LENGTH(colors), sizeof(XftColor *));
-    for (i = 0; i < LENGTH(colors); i++) {
-        scheme[i] = drw_scm_create(drw, colors[i], 3);
+    scheme = (XftColor **)ecalloc(LENGTH(COLORS), sizeof(XftColor *));
+    for (i = 0; i < LENGTH(COLORS); i++) {
+        scheme[i] = drw_scm_create(drw, COLORS[i], 3);
     }
     /* init bars */
     updatebars();

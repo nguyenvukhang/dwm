@@ -10,3 +10,6 @@ build:
 
 install: build
 	cmake --install $(BUILD_DIR)
+
+fmt:
+	git ls-files '*.c' '*.cpp' '*.h' | grep -v 'config.h' | xargs clang-format -i

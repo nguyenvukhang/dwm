@@ -2,31 +2,26 @@
 
 /* See LICENSE file for copyright and license details. */
 
-typedef struct {
-    Cursor cursor;
-} Cur;
-
-typedef struct Fnt {
+struct Fnt {
     Display *dpy;
     unsigned int h;
     XftFont *xfont;
     FcPattern *pattern;
     struct Fnt *next;
-} Fnt;
+};
 
-enum { ColFg, ColBg, ColBorder }; /* Clr scheme index */
-typedef XftColor Clr;
+enum { ColFg, ColBg, ColBorder }; /* XftColor scheme index */
 
-typedef struct {
+struct Drw {
     unsigned int w, h;
     Display *dpy;
     int screen;
     Window root;
     Drawable drawable;
     GC gc;
-    Clr *scheme;
+    XftColor *scheme;
     Fnt *fonts;
-} Drw;
+};
 
 /* Drawable abstraction */
 Drw *drw_create(Display *dpy, int screen, Window win, unsigned int w,
@@ -44,18 +39,18 @@ void drw_font_getexts(Fnt *font, const char *text, unsigned int len,
                       unsigned int *w, unsigned int *h);
 
 /* Colorscheme abstraction */
-void drw_clr_create(Drw *drw, Clr *dest, const char *clrname);
-void drw_clr_free(Drw *drw, Clr *c);
-Clr *drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount);
-void drw_scm_free(Drw *drw, Clr *scm, size_t clrcount);
+void drw_clr_create(Drw *drw, XftColor *dest, const char *clrname);
+void drw_clr_free(Drw *drw, XftColor *c);
+XftColor *drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount);
+void drw_scm_free(Drw *drw, XftColor *scm, size_t clrcount);
 
 /* Cursor abstraction */
-Cur *drw_cur_create(Drw *drw, int shape);
-void drw_cur_free(Drw *drw, Cur *cursor);
+Cursor *drw_cur_create(Drw *drw, int shape);
+void drw_cur_free(Drw *drw, Cursor *cursor);
 
 /* Drawing context manipulation */
 void drw_setfontset(Drw *drw, Fnt *set);
-void drw_setscheme(Drw *drw, Clr *scm);
+void drw_setscheme(Drw *drw, XftColor *scm);
 
 /* Drawing functions */
 void drw_rect(Drw *drw, int x, int y, unsigned int w, unsigned int h,

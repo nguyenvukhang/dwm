@@ -163,7 +163,7 @@ void drw_fontset_free(Fnt *font) {
     }
 }
 
-void drw_clr_create(Drw *drw, Clr *dest, const char *clrname) {
+void drw_clr_create(Drw *drw, XftColor *dest, const char *clrname) {
     if (!drw || !dest || !clrname) {
         return;
     }
@@ -176,13 +176,13 @@ void drw_clr_create(Drw *drw, Clr *dest, const char *clrname) {
 }
 
 /* Create color schemes. */
-Clr *drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount) {
+XftColor *drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount) {
     size_t i;
-    Clr *ret;
+    XftColor *ret;
 
     /* need at least two colors for a scheme */
     if (!drw || !clrnames || clrcount < 2 ||
-        !(ret = (Clr *)ecalloc(clrcount, sizeof(Clr)))) {
+        !(ret = (XftColor *)ecalloc(clrcount, sizeof(XftColor)))) {
         return NULL;
     }
 
@@ -192,17 +192,16 @@ Clr *drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount) {
     return ret;
 }
 
-void drw_clr_free(Drw *drw, Clr *c) {
+void drw_clr_free(Drw *drw, XftColor *c) {
     if (!drw || !c) {
         return;
     }
 
-    /* c is typedef XftColor Clr */
     XftColorFree(drw->dpy, DefaultVisual(drw->dpy, drw->screen),
                  DefaultColormap(drw->dpy, drw->screen), c);
 }
 
-void drw_scm_free(Drw *drw, Clr *scm, size_t clrcount) {
+void drw_scm_free(Drw *drw, XftColor *scm, size_t clrcount) {
     size_t i;
 
     if (!drw || !scm) {
@@ -221,7 +220,7 @@ void drw_setfontset(Drw *drw, Fnt *set) {
     }
 }
 
-void drw_setscheme(Drw *drw, Clr *scm) {
+void drw_setscheme(Drw *drw, XftColor *scm) {
     if (drw) {
         drw->scheme = scm;
     }
@@ -463,23 +462,23 @@ void drw_font_getexts(Fnt *font, const char *text, unsigned int len,
     }
 }
 
-Cur *drw_cur_create(Drw *drw, int shape) {
-    Cur *cur;
+Cursor *drw_cur_create(Drw *drw, int shape) {
+    Cursor *cur;
 
-    if (!drw || !(cur = (Cur *)ecalloc(1, sizeof(Cur)))) {
+    if (!drw || !(cur = (Cursor *)ecalloc(1, sizeof(Cursor)))) {
         return NULL;
     }
 
-    cur->cursor = XCreateFontCursor(drw->dpy, shape);
+    *cur = XCreateFontCursor(drw->dpy, shape);
 
     return cur;
 }
 
-void drw_cur_free(Drw *drw, Cur *cursor) {
+void drw_cur_free(Drw *drw, Cursor *cursor) {
     if (!cursor) {
         return;
     }
 
-    XFreeCursor(drw->dpy, cursor->cursor);
+    XFreeCursor(drw->dpy, *cursor);
     free(cursor);
 }

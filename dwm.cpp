@@ -927,8 +927,7 @@ void movemouse(const Arg *arg) {
     ocx = c->x;
     ocy = c->y;
     if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                     None, cursor[CurMove]->cursor,
-                     CurrentTime) != GrabSuccess) {
+                     None, *cursor[CurMove], CurrentTime) != GrabSuccess) {
         return;
     }
     if (!getrootptr(&x, &y)) {
@@ -1088,8 +1087,7 @@ void resizemouse(const Arg *arg) {
     ocx = c->x;
     ocy = c->y;
     if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                     None, cursor[CurResize]->cursor,
-                     CurrentTime) != GrabSuccess) {
+                     None, *cursor[CurResize], CurrentTime) != GrabSuccess) {
         return;
     }
     XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1,
@@ -1387,7 +1385,7 @@ void setup(void) {
     cursor[CurResize] = drw_cur_create(drw, XC_sizing);
     cursor[CurMove] = drw_cur_create(drw, XC_fleur);
     /* init appearance */
-    scheme = (Clr **)ecalloc(LENGTH(colors), sizeof(Clr *));
+    scheme = (XftColor **)ecalloc(LENGTH(colors), sizeof(XftColor *));
     for (i = 0; i < LENGTH(colors); i++) {
         scheme[i] = drw_scm_create(drw, colors[i], 3);
     }
@@ -1407,7 +1405,7 @@ void setup(void) {
                     PropModeReplace, (unsigned char *)netatom, NetLast);
     XDeleteProperty(dpy, root, netatom[NetClientList]);
     /* select events */
-    wa.cursor = cursor[CurNormal]->cursor;
+    wa.cursor = *cursor[CurNormal];
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask |
                     ButtonPressMask | PointerMotionMask | EnterWindowMask |
                     LeaveWindowMask | StructureNotifyMask | PropertyChangeMask;
@@ -1631,7 +1629,7 @@ void updatebars(void) {
             dpy, root, m->wx, m->by, m->ww, bh, 0, DefaultDepth(dpy, screen),
             CopyFromParent, DefaultVisual(dpy, screen),
             CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-        XDefineCursor(dpy, m->barwin, cursor[CurNormal]->cursor);
+        XDefineCursor(dpy, m->barwin, *cursor[CurNormal]);
         XMapRaised(dpy, m->barwin);
         XSetClassHint(dpy, m->barwin, &ch);
     }

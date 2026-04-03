@@ -50,23 +50,22 @@ enum {
     ClkLast
 }; /* clicks */
 
-typedef union {
+union Arg {
     int i;
     unsigned int ui;
     float f;
     const void *v;
-} Arg;
+};
 
-typedef struct {
+struct Button {
     unsigned int click;
     unsigned int mask;
     unsigned int button;
     void (*func)(const Arg *arg);
     const Arg arg;
-} Button;
+};
 
-typedef struct Monitor Monitor;
-typedef struct Client Client;
+struct Monitor;
 struct Client {
     char name[256];
     float mina, maxa;
@@ -82,17 +81,17 @@ struct Client {
     Window win;
 };
 
-typedef struct {
+struct Key {
     unsigned int mod;
     KeySym keysym;
     void (*func)(const Arg *);
     const Arg arg;
-} Key;
+};
 
-typedef struct {
+struct Layout {
     const char *symbol;
     void (*arrange)(Monitor *);
-} Layout;
+};
 
 struct Monitor {
     char ltsymbol[16];
@@ -115,14 +114,14 @@ struct Monitor {
     const Layout *lt[2];
 };
 
-typedef struct {
+struct Rule {
     const char *cls;
     const char *instance;
     const char *title;
     unsigned int tags;
     int isfloating;
     int monitor;
-} Rule;
+};
 
 /* function declarations */
 static void applyrules(Client *c);
@@ -230,8 +229,8 @@ static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent])(XEvent *);
 static Atom wmatom[WMLast], netatom[NetLast];
 static int running = 1;
-static Cur *cursor[CurLast];
-static Clr **scheme;
+static Cursor *cursor[CurLast];
+static XftColor **scheme;
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;

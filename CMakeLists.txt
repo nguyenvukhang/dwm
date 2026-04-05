@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(dwm C)
+project(dwm)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_FLAGS "-O3")
 set(CMAKE_INSTALL_PREFIX /usr/local)
 
-add_executable(dwm dwm.c drw.c util.c)
+add_executable(dwm dwm.cpp drw.cpp util.cpp)
 
-set_property(TARGET dwm PROPERTY C_STANDARD 99)
+set_property(TARGET dwm PROPERTY CXX_STANDARD 20)
 
 file(CREATE_LINK ${CMAKE_BINARY_DIR}/compile_commands.json compile_commands.json SYMBOLIC)
 

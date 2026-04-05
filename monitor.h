@@ -26,4 +26,5 @@ struct Monitor {
 
     void arrange();
     void arrangemon();
+    void drawbar() const;
 };

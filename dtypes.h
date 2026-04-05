@@ -92,7 +92,6 @@ struct Rule {
 
 /* function declarations */
 static void arrange();
-static void attachstack(Client *c);
 static void buttonpress(XEvent *e);
 static void checkotherwm(void);
 static void cleanup(void);

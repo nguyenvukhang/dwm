@@ -124,3 +124,8 @@ void Client::attach() {
     this->next = this->mon->clients;
     this->mon->clients = this;
 }
+
+void Client::attachstack() {
+    this->snext = this->mon->stack;
+    this->mon->stack = this;
+}

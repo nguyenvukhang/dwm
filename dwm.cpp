@@ -19,11 +19,6 @@ void arrange() {
     }
 }
 
-void attachstack(Client *c) {
-    c->snext = c->mon->stack;
-    c->mon->stack = c;
-}
-
 void buttonpress(XEvent *e) {
     unsigned int i, x, click;
     Arg arg = {0};
@@ -416,7 +411,7 @@ void focus(Client *c) {
             seturgent(c, 0);
         }
         detachstack(c);
-        attachstack(c);
+        c->attachstack();
         grabbuttons(c, 1);
         XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
         setfocus(c);
@@ -704,7 +699,7 @@ void manage(Window w, XWindowAttributes *wa) {
         XRaiseWindow(dpy, c->win);
     }
     c->attach();
-    attachstack(c);
+    c->attachstack();
     XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32,
                     PropModeAppend, (unsigned char *)&(c->win), 1);
     XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w,
@@ -1078,7 +1073,7 @@ void sendmon(Client *c, Monitor *m) {
     c->mon = m;
     c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
     c->attach();
-    attachstack(c);
+    c->attachstack();
     if (c->isfullscreen) {
         resizeclient(c, m->mx, m->my, m->mw, m->mh);
     }
@@ -1576,7 +1571,7 @@ int updategeom(void) {
                 detachstack(c);
                 c->mon = mons;
                 c->attach();
-                attachstack(c);
+                c->attachstack();
             }
             if (m == selmon) {
                 selmon = mons;

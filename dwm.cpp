@@ -8,7 +8,7 @@ struct NumTags {
 
 /* function implementations */
 void applyrules(Client *c) {
-    const char *class, *instance;
+    const char *cls, *instance;
     unsigned int i;
     const Rule *r;
     Monitor *m;
@@ -18,13 +18,13 @@ void applyrules(Client *c) {
     c->isfloating = 0;
     c->tags = 0;
     XGetClassHint(dpy, c->win, &ch);
-    class = ch.res_class ? ch.res_class : broken;
+    cls = ch.res_class ? ch.res_class : broken;
     instance = ch.res_name ? ch.res_name : broken;
 
     for (i = 0; i < LENGTH(rules); i++) {
         r = &rules[i];
         if ((!r->title || strstr(c->name, r->title)) &&
-            (!r->class || strstr(class, r->class)) &&
+            (!r->cls || strstr(cls, r->cls)) &&
             (!r->instance || strstr(instance, r->instance))) {
             c->isfloating = r->isfloating;
             c->tags |= r->tags;
@@ -217,7 +217,7 @@ void checkotherwm(void) {
 }
 
 void cleanup(void) {
-    Arg a = {.ui = ~0};
+    Arg a = {.ui = ~0u};
     Layout foo = {"", NULL};
     Monitor *m;
     size_t i;
@@ -389,7 +389,7 @@ void configurerequest(XEvent *e) {
 Monitor *createmon(void) {
     Monitor *m;
 
-    m = ecalloc(1, sizeof(Monitor));
+    m = (Monitor *)ecalloc(1, sizeof(Monitor));
     m->tagset[0] = m->tagset[1] = 1;
     m->mfact = mfact;
     m->nmaster = nmaster;
@@ -795,7 +795,7 @@ void manage(Window w, XWindowAttributes *wa) {
     Window trans = None;
     XWindowChanges wc;
 
-    c = ecalloc(1, sizeof(Client));
+    c = (Client *)ecalloc(1, sizeof(Client));
     c->win = w;
     /* geometry */
     c->x = c->oldx = wa->x;
@@ -1329,6 +1329,21 @@ void setup(void) {
     Atom utf8string;
     struct sigaction sa;
 
+    handler[ButtonPress] = buttonpress;
+    handler[ClientMessage] = clientmessage;
+    handler[ConfigureRequest] = configurerequest;
+    handler[ConfigureNotify] = configurenotify;
+    handler[DestroyNotify] = destroynotify;
+    handler[EnterNotify] = enternotify;
+    handler[Expose] = expose;
+    handler[FocusIn] = focusin;
+    handler[KeyPress] = keypress;
+    handler[MappingNotify] = mappingnotify;
+    handler[MapRequest] = maprequest;
+    handler[MotionNotify] = motionnotify;
+    handler[PropertyNotify] = propertynotify;
+    handler[UnmapNotify] = unmapnotify;
+
     /* do not transform children into zombies when they terminate */
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT | SA_RESTART;
@@ -1372,7 +1387,7 @@ void setup(void) {
     cursor[CurResize] = drw_cur_create(drw, XC_sizing);
     cursor[CurMove] = drw_cur_create(drw, XC_fleur);
     /* init appearance */
-    scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
+    scheme = (Clr **)ecalloc(LENGTH(colors), sizeof(Clr *));
     for (i = 0; i < LENGTH(colors); i++) {
         scheme[i] = drw_scm_create(drw, colors[i], 3);
     }
@@ -1603,10 +1618,11 @@ void unmapnotify(XEvent *e) {
 
 void updatebars(void) {
     Monitor *m;
-    XSetWindowAttributes wa = {.override_redirect = True,
-                               .background_pixmap = ParentRelative,
-                               .event_mask = ButtonPressMask | ExposureMask};
-    XClassHint ch = {"dwm", "dwm"};
+    XSetWindowAttributes wa = {.background_pixmap = ParentRelative,
+                               .event_mask = ButtonPressMask | ExposureMask,
+                               .override_redirect = True};
+    char dwm[4] = "dwm";
+    XClassHint ch = {dwm, dwm};
     for (m = mons; m; m = m->next) {
         if (m->barwin) {
             continue;
@@ -1659,7 +1675,7 @@ int updategeom(void) {
 
         for (n = 0, m = mons; m; m = m->next, n++);
         /* only consider unique geometries as separate screens */
-        unique = ecalloc(nn, sizeof(XineramaScreenInfo));
+        unique = (XineramaScreenInfo *)ecalloc(nn, sizeof(XineramaScreenInfo));
         for (i = 0, j = 0; i < nn; i++) {
             if (isuniquegeom(unique, j, &info[i])) {
                 memcpy(&unique[j++], &info[i], sizeof(XineramaScreenInfo));

@@ -1,6 +1,9 @@
 /* configuration, allows nested code to access above variables */
 #include "config.h"
 
+#include "client.cpp"
+#include "monitor.cpp"
+
 /* compile-time check if all tags fit into an unsigned int bit array. */
 struct NumTags {
     char limitexceeded[LENGTH(TAGS) > 31 ? -1 : 1];

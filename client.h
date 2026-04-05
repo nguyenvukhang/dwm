@@ -17,4 +17,6 @@ struct Client {
     Client *snext;
     Monitor *mon;
     Window win;
+
+    void applyrules();
 };

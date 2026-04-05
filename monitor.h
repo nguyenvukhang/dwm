@@ -25,4 +25,5 @@ struct Monitor {
     const Layout *lt[2];
 
     void arrange();
+    void arrangemon();
 };

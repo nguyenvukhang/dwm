@@ -2,6 +2,13 @@
 
 void Monitor::arrange() {
     showhide(this->stack);
-    arrangemon(this);
+    this->arrangemon();
     restack(this);
+}
+
+void Monitor::arrangemon() {
+    strncpy(ltsymbol, lt[sellt]->symbol, sizeof ltsymbol);
+    if (lt[sellt]->arrange) {
+        lt[sellt]->arrange(this);
+    }
 }

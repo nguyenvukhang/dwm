@@ -92,7 +92,6 @@ struct Rule {
 
 /* function declarations */
 static void arrange();
-static void arrangemon(Monitor *m);
 static void attach(Client *c);
 static void attachstack(Client *c);
 static void buttonpress(XEvent *e);

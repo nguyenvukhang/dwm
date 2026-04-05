@@ -15,14 +15,7 @@ void arrange() {
         showhide(m->stack);
     }
     for (m = mons; m; m = m->next) {
-        arrangemon(m);
-    }
-}
-
-void arrangemon(Monitor *m) {
-    strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
-    if (m->lt[m->sellt]->arrange) {
-        m->lt[m->sellt]->arrange(m);
+        m->arrangemon();
     }
 }
 

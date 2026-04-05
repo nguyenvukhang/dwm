@@ -23,4 +23,5 @@ struct Client {
     void attach();
     void attachstack();
     void configure() const;
+    void detach() const;
 };

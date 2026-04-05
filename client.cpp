@@ -144,3 +144,10 @@ void Client::configure() const {
                        .override_redirect = False};
     XSendEvent(dpy, this->win, False, StructureNotifyMask, (XEvent *)&ce);
 }
+
+void Client::detach() const {
+    Client **tc;
+
+    for (tc = &this->mon->clients; *tc && *tc != this; tc = &(*tc)->next);
+    *tc = this->next;
+}

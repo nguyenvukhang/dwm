@@ -91,8 +91,6 @@ struct Rule {
 };
 
 /* function declarations */
-static int applysizehints(Client *c, int *x, int *y, int *w, int *h,
-                          int interact);
 static void arrange(Monitor *m);
 static void arrangemon(Monitor *m);
 static void attach(Client *c);

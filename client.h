@@ -19,4 +19,5 @@ struct Client {
     Window win;
 
     void applyrules();
+    int applysizehints(int *x, int *y, int *w, int *h, int interact);
 };

@@ -9,88 +9,6 @@ struct NumTags {
     char limitexceeded[LENGTH(TAGS) > 31 ? -1 : 1];
 };
 
-int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact) {
-    int baseismin;
-    Monitor *m = c->mon;
-
-    /* set minimum possible */
-    *w = MAX(1, *w);
-    *h = MAX(1, *h);
-    if (interact) {
-        if (*x > sw) {
-            *x = sw - WIDTH(c);
-        }
-        if (*y > sh) {
-            *y = sh - HEIGHT(c);
-        }
-        if (*x + *w + 2 * c->bw < 0) {
-            *x = 0;
-        }
-        if (*y + *h + 2 * c->bw < 0) {
-            *y = 0;
-        }
-    } else {
-        if (*x >= m->wx + m->ww) {
-            *x = m->wx + m->ww - WIDTH(c);
-        }
-        if (*y >= m->wy + m->wh) {
-            *y = m->wy + m->wh - HEIGHT(c);
-        }
-        if (*x + *w + 2 * c->bw <= m->wx) {
-            *x = m->wx;
-        }
-        if (*y + *h + 2 * c->bw <= m->wy) {
-            *y = m->wy;
-        }
-    }
-    if (*h < bh) {
-        *h = bh;
-    }
-    if (*w < bh) {
-        *w = bh;
-    }
-    if (resizehints || c->isfloating || !c->mon->lt[c->mon->sellt]->arrange) {
-        if (!c->hintsvalid) {
-            updatesizehints(c);
-        }
-        /* see last two sentences in ICCCM 4.1.2.3 */
-        baseismin = c->basew == c->minw && c->baseh == c->minh;
-        if (!baseismin) { /* temporarily remove base dimensions */
-            *w -= c->basew;
-            *h -= c->baseh;
-        }
-        /* adjust for aspect limits */
-        if (c->mina > 0 && c->maxa > 0) {
-            if (c->maxa < (float)*w / *h) {
-                *w = *h * c->maxa + 0.5;
-            } else if (c->mina < (float)*h / *w) {
-                *h = *w * c->mina + 0.5;
-            }
-        }
-        if (baseismin) { /* increment calculation requires this */
-            *w -= c->basew;
-            *h -= c->baseh;
-        }
-        /* adjust for increment value */
-        if (c->incw) {
-            *w -= *w % c->incw;
-        }
-        if (c->inch) {
-            *h -= *h % c->inch;
-        }
-        /* restore base dimensions */
-        *w = MAX(*w + c->basew, c->minw);
-        *h = MAX(*h + c->baseh, c->minh);
-        if (c->maxw) {
-            *w = MIN(*w, c->maxw);
-        }
-        if (c->maxh) {
-            *h = MIN(*h, c->maxh);
-        }
-    }
-    return *x != c->x || *y != c->y || *w != c->w || *h != c->h;
-}
-
 void arrange(Monitor *m) {
     if (m) {
         showhide(m->stack);
@@ -1012,7 +930,7 @@ Monitor *recttomon(int x, int y, int w, int h) {
 }
 
 void resize(Client *c, int x, int y, int w, int h, int interact) {
-    if (applysizehints(c, &x, &y, &w, &h, interact)) {
+    if (c->applysizehints(&x, &y, &w, &h, interact)) {
         resizeclient(c, x, y, w, h);
     }
 }

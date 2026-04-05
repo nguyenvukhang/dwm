@@ -141,23 +141,6 @@ void clientmessage(XEvent *e) {
     }
 }
 
-void configure(Client *c) {
-    XConfigureEvent ce;
-
-    ce.type = ConfigureNotify;
-    ce.display = dpy;
-    ce.event = c->win;
-    ce.window = c->win;
-    ce.x = c->x;
-    ce.y = c->y;
-    ce.width = c->w;
-    ce.height = c->h;
-    ce.border_width = c->bw;
-    ce.above = None;
-    ce.override_redirect = False;
-    XSendEvent(dpy, c->win, False, StructureNotifyMask, (XEvent *)&ce);
-}
-
 void configurenotify(XEvent *e) {
     Monitor *m;
     Client *c;
@@ -223,13 +206,13 @@ void configurerequest(XEvent *e) {
             }
             if ((ev->value_mask & (CWX | CWY)) &&
                 !(ev->value_mask & (CWWidth | CWHeight))) {
-                configure(c);
+                c->configure();
             }
             if (ISVISIBLE(c)) {
                 XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
             }
         } else {
-            configure(c);
+            c->configure();
         }
     } else {
         wc.x = ev->x;
@@ -684,7 +667,7 @@ void manage(Window w, XWindowAttributes *wa) {
     wc.border_width = c->bw;
     XConfigureWindow(dpy, w, CWBorderWidth, &wc);
     XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
-    configure(c); /* propagates border_width, if size doesn't change */
+    c->configure(); /* propagates border_width, if size doesn't change */
     updatewindowtype(c);
     updatesizehints(c);
     updatewmhints(c);
@@ -924,7 +907,7 @@ void resizeclient(Client *c, int x, int y, int w, int h) {
     wc.border_width = c->bw;
     XConfigureWindow(dpy, c->win,
                      CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
-    configure(c);
+    c->configure();
     XSync(dpy, False);
 }
 

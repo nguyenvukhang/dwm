@@ -22,4 +22,5 @@ struct Client {
     int applysizehints(int *x, int *y, int *w, int *h, int interact);
     void attach();
     void attachstack();
+    void configure() const;
 };

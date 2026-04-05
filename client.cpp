@@ -129,3 +129,18 @@ void Client::attachstack() {
     this->snext = this->mon->stack;
     this->mon->stack = this;
 }
+
+void Client::configure() const {
+    XConfigureEvent ce{.type = ConfigureNotify,
+                       .display = dpy,
+                       .event = this->win,
+                       .window = this->win,
+                       .x = this->x,
+                       .y = this->y,
+                       .width = this->w,
+                       .height = this->h,
+                       .border_width = this->bw,
+                       .above = None,
+                       .override_redirect = False};
+    XSendEvent(dpy, this->win, False, StructureNotifyMask, (XEvent *)&ce);
+}

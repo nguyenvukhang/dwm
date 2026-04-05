@@ -9,21 +9,13 @@ struct NumTags {
     char limitexceeded[LENGTH(TAGS) > 31 ? -1 : 1];
 };
 
-void arrange(Monitor *m) {
-    if (m) {
+void arrange() {
+    Monitor *m;
+    for (m = mons; m; m = m->next) {
         showhide(m->stack);
-    } else {
-        for (m = mons; m; m = m->next) {
-            showhide(m->stack);
-        }
     }
-    if (m) {
+    for (m = mons; m; m = m->next) {
         arrangemon(m);
-        restack(m);
-    } else {
-        for (m = mons; m; m = m->next) {
-            arrangemon(m);
-        }
     }
 }
 
@@ -206,7 +198,7 @@ void configurenotify(XEvent *e) {
                 XMoveResizeWindow(dpy, m->barwin, m->wx, m->by, m->ww, bh);
             }
             focus(NULL);
-            arrange(NULL);
+            arrange();
         }
     }
 }
@@ -626,7 +618,7 @@ void grabkeys(void) {
 
 void incnmaster(const Arg *arg) {
     selmon->nmaster = MAX(selmon->nmaster + arg->i, 0);
-    arrange(selmon);
+    selmon->arrange();
 }
 
 #ifdef XINERAMA
@@ -734,7 +726,7 @@ void manage(Window w, XWindowAttributes *wa) {
         unfocus(selmon->sel, 0);
     }
     c->mon->sel = c;
-    arrange(c->mon);
+    c->mon->arrange();
     XMapWindow(dpy, c->win);
     focus(NULL);
 }
@@ -872,7 +864,7 @@ void pop(Client *c) {
     detach(c);
     attach(c);
     focus(c);
-    arrange(c->mon);
+    c->mon->arrange();
 }
 
 void propertynotify(XEvent *e) {
@@ -891,7 +883,7 @@ void propertynotify(XEvent *e) {
         case XA_WM_TRANSIENT_FOR:
             if (!c->isfloating && (XGetTransientForHint(dpy, c->win, &trans)) &&
                 (c->isfloating = (wintoclient(trans)) != NULL)) {
-                arrange(c->mon);
+                c->mon->arrange();
             }
             break;
         case XA_WM_NORMAL_HINTS:
@@ -1103,7 +1095,7 @@ void sendmon(Client *c, Monitor *m) {
         resizeclient(c, m->mx, m->my, m->mw, m->mh);
     }
     focus(NULL);
-    arrange(NULL);
+    arrange();
 }
 
 void setclientstate(Client *c, long state) {
@@ -1169,7 +1161,7 @@ void setfullscreen(Client *c, int fullscreen) {
         c->w = c->oldw;
         c->h = c->oldh;
         resizeclient(c, c->x, c->y, c->w, c->h);
-        arrange(c->mon);
+        c->mon->arrange();
     }
 }
 
@@ -1183,7 +1175,7 @@ void setlayout(const Arg *arg) {
     strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol,
             sizeof selmon->ltsymbol);
     if (selmon->sel) {
-        arrange(selmon);
+        selmon->arrange();
     } else {
         drawbar(selmon);
     }
@@ -1201,7 +1193,7 @@ void setmfact(const Arg *arg) {
         return;
     }
     selmon->mfact = f;
-    arrange(selmon);
+    selmon->arrange();
 }
 
 void setup(void) {
@@ -1356,7 +1348,7 @@ void tag(const Arg *arg) {
     if (selmon->sel && arg->ui & TAGMASK) {
         selmon->sel->tags = arg->ui & TAGMASK;
         focus(NULL);
-        arrange(selmon);
+        selmon->arrange();
     }
 }
 
@@ -1405,7 +1397,7 @@ void togglebar(const Arg *arg) {
     updatebarpos(selmon);
     XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww,
                       bh);
-    arrange(selmon);
+    selmon->arrange();
 }
 
 void togglefloating(const Arg *arg) {
@@ -1420,7 +1412,7 @@ void togglefloating(const Arg *arg) {
         resize(selmon->sel, selmon->sel->x, selmon->sel->y, selmon->sel->w,
                selmon->sel->h, 0);
     }
-    arrange(selmon);
+    selmon->arrange();
 }
 
 void toggletag(const Arg *arg) {
@@ -1433,7 +1425,7 @@ void toggletag(const Arg *arg) {
     if (newtags) {
         selmon->sel->tags = newtags;
         focus(NULL);
-        arrange(selmon);
+        selmon->arrange();
     }
 }
 
@@ -1444,7 +1436,7 @@ void toggleview(const Arg *arg) {
     if (newtagset) {
         selmon->tagset[selmon->seltags] = newtagset;
         focus(NULL);
-        arrange(selmon);
+        selmon->arrange();
     }
 }
 
@@ -1481,7 +1473,7 @@ void unmanage(Client *c, int destroyed) {
     free(c);
     focus(NULL);
     updateclientlist();
-    arrange(m);
+    m->arrange();
 }
 
 void unmapnotify(XEvent *e) {
@@ -1746,7 +1738,7 @@ void view(const Arg *arg) {
         selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
     }
     focus(NULL);
-    arrange(selmon);
+    selmon->arrange();
 }
 
 Client *wintoclient(Window w) {

@@ -23,4 +23,6 @@ struct Monitor {
     Monitor *next;
     Window barwin;
     const Layout *lt[2];
+
+    void arrange();
 };

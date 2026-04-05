@@ -19,11 +19,6 @@ void arrange() {
     }
 }
 
-void attach(Client *c) {
-    c->next = c->mon->clients;
-    c->mon->clients = c;
-}
-
 void attachstack(Client *c) {
     c->snext = c->mon->stack;
     c->mon->stack = c;
@@ -708,7 +703,7 @@ void manage(Window w, XWindowAttributes *wa) {
     if (c->isfloating) {
         XRaiseWindow(dpy, c->win);
     }
-    attach(c);
+    c->attach();
     attachstack(c);
     XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32,
                     PropModeAppend, (unsigned char *)&(c->win), 1);
@@ -855,7 +850,7 @@ Client *nexttiled(Client *c) {
 
 void pop(Client *c) {
     detach(c);
-    attach(c);
+    c->attach();
     focus(c);
     c->mon->arrange();
 }
@@ -1082,7 +1077,7 @@ void sendmon(Client *c, Monitor *m) {
     detachstack(c);
     c->mon = m;
     c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
-    attach(c);
+    c->attach();
     attachstack(c);
     if (c->isfullscreen) {
         resizeclient(c, m->mx, m->my, m->mw, m->mh);
@@ -1580,7 +1575,7 @@ int updategeom(void) {
                 m->clients = c->next;
                 detachstack(c);
                 c->mon = mons;
-                attach(c);
+                c->attach();
                 attachstack(c);
             }
             if (m == selmon) {

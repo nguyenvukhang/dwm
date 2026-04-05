@@ -119,3 +119,8 @@ int Client::applysizehints(int *x, int *y, int *w, int *h, int interact) {
     }
     return *x != this->x || *y != this->y || *w != this->w || *h != this->h;
 }
+
+void Client::attach() {
+    this->next = this->mon->clients;
+    this->mon->clients = this;
+}

@@ -20,4 +20,5 @@ struct Client {
 
     void applyrules();
     int applysizehints(int *x, int *y, int *w, int *h, int interact);
+    void attach();
 };

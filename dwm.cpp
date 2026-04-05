@@ -251,18 +251,6 @@ void destroynotify(XEvent *e) {
     }
 }
 
-void detachstack(Client *c) {
-    Client **tc, *t;
-
-    for (tc = &c->mon->stack; *tc && *tc != c; tc = &(*tc)->snext);
-    *tc = c->snext;
-
-    if (c == c->mon->sel) {
-        for (t = c->mon->stack; t && !ISVISIBLE(t); t = t->snext);
-        c->mon->sel = t;
-    }
-}
-
 Monitor *dirtomon(int dir) {
     Monitor *m = NULL;
 
@@ -386,7 +374,7 @@ void focus(Client *c) {
         if (c->isurgent) {
             seturgent(c, 0);
         }
-        detachstack(c);
+        c->detachstack();
         c->attachstack();
         grabbuttons(c, 1);
         XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
@@ -1045,7 +1033,7 @@ void sendmon(Client *c, Monitor *m) {
     }
     unfocus(c, 1);
     c->detach();
-    detachstack(c);
+    c->detachstack();
     c->mon = m;
     c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
     c->attach();
@@ -1416,7 +1404,7 @@ void unmanage(Client *c, int destroyed) {
     XWindowChanges wc;
 
     c->detach();
-    detachstack(c);
+    c->detachstack();
     if (!destroyed) {
         wc.border_width = c->oldbw;
         XGrabServer(dpy); /* avoid race conditions */
@@ -1544,7 +1532,7 @@ int updategeom(void) {
             while ((c = m->clients)) {
                 dirty = 1;
                 m->clients = c->next;
-                detachstack(c);
+                c->detachstack();
                 c->mon = mons;
                 c->attach();
                 c->attachstack();

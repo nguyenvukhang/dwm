@@ -151,3 +151,15 @@ void Client::detach() const {
     for (tc = &this->mon->clients; *tc && *tc != this; tc = &(*tc)->next);
     *tc = this->next;
 }
+
+void Client::detachstack() const {
+    Client **tc, *t;
+
+    for (tc = &this->mon->stack; *tc && *tc != this; tc = &(*tc)->snext);
+    *tc = this->snext;
+
+    if (this == this->mon->sel) {
+        for (t = this->mon->stack; t && !ISVISIBLE(t); t = t->snext);
+        this->mon->sel = t;
+    }
+}

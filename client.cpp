@@ -283,3 +283,10 @@ void Client::sendmon(Monitor *m) {
     focus(NULL);
     arrange();
 }
+
+void Client::setclientstate(long state) const {
+    long data[] = {state, None};
+
+    XChangeProperty(dpy, this->win, wmatom[WMState], wmatom[WMState], 32,
+                    PropModeReplace, (unsigned char *)data, 2);
+}

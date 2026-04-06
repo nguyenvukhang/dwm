@@ -570,7 +570,7 @@ void manage(Window w, XWindowAttributes *wa) {
                     PropModeAppend, (unsigned char *)&(c->win), 1);
     XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w,
                       c->h); /* some windows require this */
-    setclientstate(c, NormalState);
+    c->setclientstate(NormalState);
     if (c->mon == selmon) {
         unfocus(selmon->sel, 0);
     }
@@ -865,13 +865,6 @@ void scan(void) {
             XFree(wins);
         }
     }
-}
-
-void setclientstate(Client *c, long state) {
-    long data[] = {state, None};
-
-    XChangeProperty(dpy, c->win, wmatom[WMState], wmatom[WMState], 32,
-                    PropModeReplace, (unsigned char *)data, 2);
 }
 
 void setfocus(Client *c) {
@@ -1210,7 +1203,7 @@ void unmanage(Client *c, int destroyed) {
         XSelectInput(dpy, c->win, NoEventMask);
         XConfigureWindow(dpy, c->win, CWBorderWidth, &wc); /* restore border */
         XUngrabButton(dpy, AnyButton, AnyModifier, c->win);
-        setclientstate(c, WithdrawnState);
+        c->setclientstate(WithdrawnState);
         XSync(dpy, False);
         XSetErrorHandler(xerror);
         XUngrabServer(dpy);
@@ -1227,7 +1220,7 @@ void unmapnotify(XEvent *e) {
 
     if ((c = wintoclient(ev->window))) {
         if (ev->send_event) {
-            setclientstate(c, WithdrawnState);
+            c->setclientstate(WithdrawnState);
         } else {
             unmanage(c, 0);
         }

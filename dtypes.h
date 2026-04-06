@@ -128,7 +128,6 @@ static Monitor *recttomon(int x, int y, int w, int h);
 static void resizemouse(const Arg *arg);
 static void run(void);
 static void scan(void);
-static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setlayout(const Arg *arg);

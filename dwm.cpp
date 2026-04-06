@@ -698,7 +698,7 @@ void movemouse(const Arg *arg) {
     } while (ev.type != ButtonRelease);
     XUngrabPointer(dpy, CurrentTime);
     if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
-        sendmon(c, m);
+        c->sendmon(m);
         selmon = m;
         focus(NULL);
     }
@@ -817,7 +817,7 @@ void resizemouse(const Arg *arg) {
     XUngrabPointer(dpy, CurrentTime);
     while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
     if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
-        sendmon(c, m);
+        c->sendmon(m);
         selmon = m;
         focus(NULL);
     }
@@ -865,24 +865,6 @@ void scan(void) {
             XFree(wins);
         }
     }
-}
-
-void sendmon(Client *c, Monitor *m) {
-    if (c->mon == m) {
-        return;
-    }
-    unfocus(c, 1);
-    c->detach();
-    c->detachstack();
-    c->mon = m;
-    c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
-    c->attach();
-    c->attachstack();
-    if (c->isfullscreen) {
-        c->resizeclient(m->mx, m->my, m->mw, m->mh);
-    }
-    focus(NULL);
-    arrange();
 }
 
 void setclientstate(Client *c, long state) {
@@ -1119,7 +1101,7 @@ void tagmon(const Arg *arg) {
     if (!selmon->sel || !mons->next) {
         return;
     }
-    sendmon(selmon->sel, dirtomon(arg->i));
+    selmon->sel->sendmon(dirtomon(arg->i));
 }
 
 void tile(Monitor *m) {

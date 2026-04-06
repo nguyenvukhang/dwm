@@ -265,3 +265,21 @@ int Client::sendevent(Atom proto) const {
     }
     return exists;
 }
+
+void Client::sendmon(Monitor *m) {
+    if (this->mon == m) {
+        return;
+    }
+    unfocus(this, 1);
+    this->detach();
+    this->detachstack();
+    this->mon = m;
+    this->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
+    this->attach();
+    this->attachstack();
+    if (this->isfullscreen) {
+        this->resizeclient(m->mx, m->my, m->mw, m->mh);
+    }
+    focus(NULL);
+    arrange();
+}

@@ -32,4 +32,5 @@ struct Client {
     void resize(int x, int y, int w, int h, int interact);
     void resizeclient(int x, int y, int w, int h);
     int sendevent(Atom proto) const;
+    void sendmon(Monitor *);
 };

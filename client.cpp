@@ -340,3 +340,23 @@ void Client::seturgent(int urg) {
     XSetWMHints(dpy, this->win, wmh);
     XFree(wmh);
 }
+
+void Client::showhide() {
+    if (ISVISIBLE(this)) {
+        /* show clients top down */
+        XMoveWindow(dpy, this->win, this->x, this->y);
+        if ((!this->mon->lt[this->mon->sellt]->arrange || this->isfloating) &&
+            !this->isfullscreen) {
+            this->resize(this->x, this->y, this->w, this->h, 0);
+        }
+        if (this->snext) {
+            this->snext->showhide();
+        }
+    } else {
+        /* hide clients bottom up */
+        if (this->snext) {
+            this->snext->showhide();
+        }
+        XMoveWindow(dpy, this->win, WIDTH(this) * -2, this->y);
+    }
+}

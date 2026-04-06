@@ -2,7 +2,9 @@
 #include "config.h"
 
 void Monitor::arrange() {
-    showhide(this->stack);
+    if (this->stack) {
+        this->stack->showhide();
+    }
     this->arrangemon();
     this->restack();
 }

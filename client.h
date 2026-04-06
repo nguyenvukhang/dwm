@@ -37,4 +37,5 @@ struct Client {
     void setfocus() const;
     void setfullscreen(int fullscreen);
     void seturgent(int urg);
+    void showhide();
 };

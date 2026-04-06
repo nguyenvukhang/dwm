@@ -12,7 +12,9 @@ struct NumTags {
 void arrange() {
     Monitor *m;
     for (m = mons; m; m = m->next) {
-        showhide(m->stack);
+        if (m->stack) {
+            m->stack->showhide();
+        }
     }
     for (m = mons; m; m = m->next) {
         m->arrangemon();
@@ -989,25 +991,6 @@ void setup(void) {
     XSelectInput(dpy, root, wa.event_mask);
     grabkeys();
     focus(NULL);
-}
-
-void showhide(Client *c) {
-    if (!c) {
-        return;
-    }
-    if (ISVISIBLE(c)) {
-        /* show clients top down */
-        XMoveWindow(dpy, c->win, c->x, c->y);
-        if ((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating) &&
-            !c->isfullscreen) {
-            c->resize(c->x, c->y, c->w, c->h, 0);
-        }
-        showhide(c->snext);
-    } else {
-        /* hide clients bottom up */
-        showhide(c->snext);
-        XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
-    }
 }
 
 void spawn(const Arg *arg) {

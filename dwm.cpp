@@ -560,7 +560,7 @@ void manage(Window w, XWindowAttributes *wa) {
     XConfigureWindow(dpy, w, CWBorderWidth, &wc);
     XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
     c->configure(); /* propagates border_width, if size doesn't change */
-    updatewindowtype(c);
+    c->updatewindowtype();
     c->updatesizehints();
     updatewmhints(c);
     XSelectInput(dpy, w,
@@ -751,7 +751,7 @@ void propertynotify(XEvent *e) {
             }
         }
         if (ev->atom == netatom[NetWMWindowType]) {
-            updatewindowtype(c);
+            c->updatewindowtype();
         }
     }
 }
@@ -1273,18 +1273,6 @@ void updatestatus(void) {
         strcpy(stext, "dwm-" VERSION);
     }
     selmon->drawbar();
-}
-
-void updatewindowtype(Client *c) {
-    Atom state = c->getatomprop(netatom[NetWMState]);
-    Atom wtype = c->getatomprop(netatom[NetWMWindowType]);
-
-    if (state == netatom[NetWMFullscreen]) {
-        c->setfullscreen(1);
-    }
-    if (wtype == netatom[NetWMWindowTypeDialog]) {
-        c->isfloating = 1;
-    }
 }
 
 void updatewmhints(Client *c) {

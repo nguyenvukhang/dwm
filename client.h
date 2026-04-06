@@ -42,4 +42,5 @@ struct Client {
     void unmanage(int destroyed);
     void updatesizehints();
     void updatetitle();
+    void updatewindowtype();
 };

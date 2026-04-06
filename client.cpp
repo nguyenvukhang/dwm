@@ -453,3 +453,15 @@ void Client::updatetitle() {
         strcpy(this->name, broken);
     }
 }
+
+void Client::updatewindowtype() {
+    Atom state = this->getatomprop(netatom[NetWMState]);
+    Atom wtype = this->getatomprop(netatom[NetWMWindowType]);
+
+    if (state == netatom[NetWMFullscreen]) {
+        this->setfullscreen(1);
+    }
+    if (wtype == netatom[NetWMWindowTypeDialog]) {
+        this->isfloating = 1;
+    }
+}

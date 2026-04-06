@@ -319,7 +319,7 @@ void focus(Client *c) {
         }
         c->detachstack();
         c->attachstack();
-        grabbuttons(c, 1);
+        c->grabbuttons(1);
         XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
         setfocus(c);
     } else {
@@ -433,30 +433,6 @@ int gettextprop(Window w, Atom atom, char *text, unsigned int size) {
     text[size - 1] = '\0';
     XFree(name.value);
     return 1;
-}
-
-void grabbuttons(Client *c, int focused) {
-    updatenumlockmask();
-    {
-        unsigned int i, j;
-        unsigned int modifiers[] = {0, LockMask, numlockmask,
-                                    numlockmask | LockMask};
-        XUngrabButton(dpy, AnyButton, AnyModifier, c->win);
-        if (!focused) {
-            XGrabButton(dpy, AnyButton, AnyModifier, c->win, False, BUTTONMASK,
-                        GrabModeSync, GrabModeSync, None, None);
-        }
-        for (i = 0; i < LENGTH(BUTTONS); i++) {
-            if (BUTTONS[i].click == ClkClientWin) {
-                for (j = 0; j < LENGTH(modifiers); j++) {
-                    XGrabButton(dpy, BUTTONS[i].button,
-                                BUTTONS[i].mask | modifiers[j], c->win, False,
-                                BUTTONMASK, GrabModeAsync, GrabModeSync, None,
-                                None);
-                }
-            }
-        }
-    }
 }
 
 void grabkeys(void) {
@@ -581,7 +557,7 @@ void manage(Window w, XWindowAttributes *wa) {
     XSelectInput(dpy, w,
                  EnterWindowMask | FocusChangeMask | PropertyChangeMask |
                      StructureNotifyMask);
-    grabbuttons(c, 0);
+    c->grabbuttons(0);
     if (!c->isfloating) {
         c->isfloating = c->oldstate = trans != None || c->isfixed;
     }
@@ -1317,7 +1293,7 @@ void unfocus(Client *c, int setfocus) {
     if (!c) {
         return;
     }
-    grabbuttons(c, 0);
+    c->grabbuttons(0);
     XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
     if (setfocus) {
         XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);

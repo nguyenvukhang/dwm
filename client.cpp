@@ -180,3 +180,27 @@ Atom Client::getatomprop(Atom prop) const {
     }
     return atom;
 }
+
+void Client::grabbuttons(int focused) const {
+    updatenumlockmask();
+    {
+        unsigned int i, j;
+        unsigned int modifiers[] = {0, LockMask, numlockmask,
+                                    numlockmask | LockMask};
+        XUngrabButton(dpy, AnyButton, AnyModifier, this->win);
+        if (!focused) {
+            XGrabButton(dpy, AnyButton, AnyModifier, this->win, False,
+                        BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
+        }
+        for (i = 0; i < LENGTH(BUTTONS); i++) {
+            if (BUTTONS[i].click == ClkClientWin) {
+                for (j = 0; j < LENGTH(modifiers); j++) {
+                    XGrabButton(dpy, BUTTONS[i].button,
+                                BUTTONS[i].mask | modifiers[j], this->win,
+                                False, BUTTONMASK, GrabModeAsync, GrabModeSync,
+                                None, None);
+                }
+            }
+        }
+    }
+}

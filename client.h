@@ -27,4 +27,5 @@ struct Client {
     void detachstack() const;
     Atom getatomprop(Atom prop) const;
     void grabbuttons(int focused) const;
+    Client *nexttiled();
 };

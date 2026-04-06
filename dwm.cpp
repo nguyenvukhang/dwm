@@ -613,7 +613,7 @@ void monocle(Monitor *m) {
     if (n > 0) { /* override layout symbol */
         snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
     }
-    for (c = nexttiled(m->clients); c; c = nexttiled(c->next)) {
+    for (c = m->clients->nexttiled(); c; c = c->next->nexttiled()) {
         resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
     }
 }
@@ -702,11 +702,6 @@ void movemouse(const Arg *arg) {
         selmon = m;
         focus(NULL);
     }
-}
-
-Client *nexttiled(Client *c) {
-    for (; c && (c->isfloating || !ISVISIBLE(c)); c = c->next);
-    return c;
 }
 
 void pop(Client *c) {
@@ -1212,7 +1207,7 @@ void tile(Monitor *m) {
     unsigned int i, n, h, mw, my, ty;
     Client *c;
 
-    for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+    for (n = 0, c = m->clients->nexttiled(); c; c = c->next->nexttiled(), n++);
     if (n == 0) {
         return;
     }
@@ -1222,8 +1217,8 @@ void tile(Monitor *m) {
     } else {
         mw = m->ww;
     }
-    for (i = my = ty = 0, c = nexttiled(m->clients); c;
-         c = nexttiled(c->next), i++) {
+    for (i = my = ty = 0, c = m->clients->nexttiled(); c;
+         c = c->next->nexttiled(), i++) {
         if (i < m->nmaster) {
             h = (m->wh - my) / (MIN(n, m->nmaster) - i);
             resize(c, m->wx, m->wy + my, mw - (2 * c->bw), h - (2 * c->bw), 0);
@@ -1659,7 +1654,7 @@ void zoom(const Arg *arg) {
     if (!selmon->lt[selmon->sellt]->arrange || !c || c->isfloating) {
         return;
     }
-    if (c == nexttiled(selmon->clients) && !(c = nexttiled(c->next))) {
+    if (c == selmon->clients->nexttiled() && !(c = c->next->nexttiled())) {
         return;
     }
     pop(c);

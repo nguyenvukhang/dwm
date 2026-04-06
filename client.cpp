@@ -204,3 +204,9 @@ void Client::grabbuttons(int focused) const {
         }
     }
 }
+
+Client *Client::nexttiled() {
+    Client *c = this;
+    for (; c && (c->isfloating || !ISVISIBLE(c)); c = c->next);
+    return c;
+}

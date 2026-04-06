@@ -270,7 +270,7 @@ void Client::sendmon(Monitor *m) {
     if (this->mon == m) {
         return;
     }
-    unfocus(this, 1);
+    this->unfocus(1);
     this->detach();
     this->detachstack();
     this->mon = m;
@@ -358,5 +358,14 @@ void Client::showhide() {
             this->snext->showhide();
         }
         XMoveWindow(dpy, this->win, WIDTH(this) * -2, this->y);
+    }
+}
+
+void Client::unfocus(int setfocus) const {
+    this->grabbuttons(0);
+    XSetWindowBorder(dpy, this->win, scheme[SchemeNorm][ColBorder].pixel);
+    if (setfocus) {
+        XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
+        XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
     }
 }

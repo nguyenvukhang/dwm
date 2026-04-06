@@ -31,7 +31,9 @@ void buttonpress(XEvent *e) {
     click = ClkRootWin;
     /* focus monitor if necessary */
     if ((m = wintomon(ev->window)) && m != selmon) {
-        unfocus(selmon->sel, 1);
+        if (selmon->sel) {
+            selmon->sel->unfocus(1);
+        }
         selmon = m;
         focus(NULL);
     }
@@ -287,7 +289,9 @@ void enternotify(XEvent *e) {
     c = wintoclient(ev->window);
     m = c ? c->mon : wintomon(ev->window);
     if (m != selmon) {
-        unfocus(selmon->sel, 1);
+        if (selmon->sel) {
+            selmon->sel->unfocus(1);
+        }
         selmon = m;
     } else if (!c || c == selmon->sel) {
         return;
@@ -309,7 +313,9 @@ void focus(Client *c) {
         for (c = selmon->stack; c && !ISVISIBLE(c); c = c->snext);
     }
     if (selmon->sel && selmon->sel != c) {
-        unfocus(selmon->sel, 0);
+        if (selmon->sel) {
+            selmon->sel->unfocus(0);
+        }
     }
     if (c) {
         if (c->mon != selmon) {
@@ -349,7 +355,9 @@ void focusmon(const Arg *arg) {
     if ((m = dirtomon(arg->i)) == selmon) {
         return;
     }
-    unfocus(selmon->sel, 0);
+    if (selmon->sel) {
+        selmon->sel->unfocus(0);
+    }
     selmon = m;
     focus(NULL);
 }
@@ -573,7 +581,9 @@ void manage(Window w, XWindowAttributes *wa) {
                       c->h); /* some windows require this */
     c->setclientstate(NormalState);
     if (c->mon == selmon) {
-        unfocus(selmon->sel, 0);
+        if (selmon->sel) {
+            selmon->sel->unfocus(0);
+        }
     }
     c->mon->sel = c;
     c->mon->arrange();
@@ -628,7 +638,9 @@ void motionnotify(XEvent *e) {
         return;
     }
     if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon && mon) {
-        unfocus(selmon->sel, 1);
+        if (selmon->sel) {
+            selmon->sel->unfocus(1);
+        }
         selmon = m;
         focus(NULL);
     }
@@ -1108,18 +1120,6 @@ void toggleview(const Arg *arg) {
         selmon->tagset[selmon->seltags] = newtagset;
         focus(NULL);
         selmon->arrange();
-    }
-}
-
-void unfocus(Client *c, int setfocus) {
-    if (!c) {
-        return;
-    }
-    c->grabbuttons(0);
-    XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
-    if (setfocus) {
-        XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
-        XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
     }
 }
 

@@ -163,3 +163,20 @@ void Client::detachstack() const {
         this->mon->sel = t;
     }
 }
+Atom Client::getatomprop(Atom prop) const {
+    int format;
+    unsigned long nitems, dl;
+    unsigned char *p = NULL;
+    Atom da, atom = None;
+
+    if (XGetWindowProperty(dpy, this->win, prop, 0L, sizeof atom, False,
+                           XA_ATOM, &da, &format, &nitems, &dl,
+                           &p) == Success &&
+        p) {
+        if (nitems > 0 && format == 32) {
+            atom = *(long *)p;
+        }
+        XFree(p);
+    }
+    return atom;
+}

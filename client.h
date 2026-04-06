@@ -25,4 +25,5 @@ struct Client {
     void configure() const;
     void detach() const;
     void detachstack() const;
+    Atom getatomprop(Atom prop) const;
 };

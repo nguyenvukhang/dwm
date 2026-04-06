@@ -384,23 +384,6 @@ void focusstack(const Arg *arg) {
     }
 }
 
-Atom getatomprop(Client *c, Atom prop) {
-    int format;
-    unsigned long nitems, dl;
-    unsigned char *p = NULL;
-    Atom da, atom = None;
-
-    if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, XA_ATOM,
-                           &da, &format, &nitems, &dl, &p) == Success &&
-        p) {
-        if (nitems > 0 && format == 32) {
-            atom = *(long *)p;
-        }
-        XFree(p);
-    }
-    return atom;
-}
-
 int getrootptr(int *x, int *y) {
     int di;
     unsigned int dui;
@@ -1589,8 +1572,8 @@ void updatetitle(Client *c) {
 }
 
 void updatewindowtype(Client *c) {
-    Atom state = getatomprop(c, netatom[NetWMState]);
-    Atom wtype = getatomprop(c, netatom[NetWMWindowType]);
+    Atom state = c->getatomprop(netatom[NetWMState]);
+    Atom wtype = c->getatomprop(netatom[NetWMWindowType]);
 
     if (state == netatom[NetWMFullscreen]) {
         setfullscreen(c, 1);

@@ -9,7 +9,6 @@ add_executable(dwm dwm.c drw.c util.c)
 
 set_property(TARGET dwm PROPERTY C_STANDARD 99)
 
-file(COPY_FILE config.def.h config.h)
 file(CREATE_LINK ${CMAKE_BINARY_DIR}/compile_commands.json compile_commands.json SYMBOLIC)
 
 find_package(X11 REQUIRED)

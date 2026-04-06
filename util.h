@@ -1,3 +1,5 @@
+#include "prelude.h"
+
 /* See LICENSE file for copyright and license details. */
 
 #define MAX(A, B)               ((A) > (B) ? (A) : (B))

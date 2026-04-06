@@ -614,7 +614,7 @@ void monocle(Monitor *m) {
         snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
     }
     for (c = m->clients->nexttiled(); c; c = c->next->nexttiled()) {
-        resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
+        c->resize(m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
     }
 }
 
@@ -691,7 +691,7 @@ void movemouse(const Arg *arg) {
                 togglefloating(NULL);
             }
             if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
-                resize(c, nx, ny, c->w, c->h, 1);
+                c->resize(nx, ny, c->w, c->h, 1);
             }
             break;
         }
@@ -756,12 +756,6 @@ Monitor *recttomon(int x, int y, int w, int h) {
         }
     }
     return r;
-}
-
-void resize(Client *c, int x, int y, int w, int h, int interact) {
-    if (c->applysizehints(&x, &y, &w, &h, interact)) {
-        resizeclient(c, x, y, w, h);
-    }
 }
 
 void resizeclient(Client *c, int x, int y, int w, int h) {
@@ -831,7 +825,7 @@ void resizemouse(const Arg *arg) {
                 }
             }
             if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
-                resize(c, c->x, c->y, nw, nh, 1);
+                c->resize(c->x, c->y, nw, nh, 1);
             }
             break;
         }
@@ -1149,7 +1143,7 @@ void showhide(Client *c) {
         XMoveWindow(dpy, c->win, c->x, c->y);
         if ((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating) &&
             !c->isfullscreen) {
-            resize(c, c->x, c->y, c->w, c->h, 0);
+            c->resize(c->x, c->y, c->w, c->h, 0);
         }
         showhide(c->snext);
     } else {
@@ -1214,14 +1208,14 @@ void tile(Monitor *m) {
          c = c->next->nexttiled(), i++) {
         if (i < m->nmaster) {
             h = (m->wh - my) / (MIN(n, m->nmaster) - i);
-            resize(c, m->wx, m->wy + my, mw - (2 * c->bw), h - (2 * c->bw), 0);
+            c->resize(m->wx, m->wy + my, mw - (2 * c->bw), h - (2 * c->bw), 0);
             if (my + HEIGHT(c) < m->wh) {
                 my += HEIGHT(c);
             }
         } else {
             h = (m->wh - ty) / (n - i);
-            resize(c, m->wx + mw, m->wy + ty, m->ww - mw - (2 * c->bw),
-                   h - (2 * c->bw), 0);
+            c->resize(m->wx + mw, m->wy + ty, m->ww - mw - (2 * c->bw),
+                      h - (2 * c->bw), 0);
             if (ty + HEIGHT(c) < m->wh) {
                 ty += HEIGHT(c);
             }
@@ -1246,8 +1240,8 @@ void togglefloating(const Arg *arg) {
     }
     selmon->sel->isfloating = !selmon->sel->isfloating || selmon->sel->isfixed;
     if (selmon->sel->isfloating) {
-        resize(selmon->sel, selmon->sel->x, selmon->sel->y, selmon->sel->w,
-               selmon->sel->h, 0);
+        selmon->sel->resize(selmon->sel->x, selmon->sel->y, selmon->sel->w,
+                            selmon->sel->h, 0);
     }
     selmon->arrange();
 }

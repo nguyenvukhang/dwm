@@ -217,3 +217,9 @@ void Client::pop() {
     focus(this);
     this->mon->arrange();
 }
+
+void Client::resize(int x, int y, int w, int h, int interact) {
+    if (this->applysizehints(&x, &y, &w, &h, interact)) {
+        resizeclient(this, x, y, w, h);
+    }
+}

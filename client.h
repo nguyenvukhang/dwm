@@ -29,4 +29,5 @@ struct Client {
     void grabbuttons(int focused) const;
     Client *nexttiled();
     void pop();
+    void resize(int x, int y, int w, int h, int interact);
 };

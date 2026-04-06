@@ -80,7 +80,7 @@ int Client::applysizehints(int *x, int *y, int *w, int *h, int interact) {
     if (resizehints || this->isfloating ||
         !this->mon->lt[this->mon->sellt]->arrange) {
         if (!this->hintsvalid) {
-            updatesizehints(this);
+            this->updatesizehints();
         }
         /* see last two sentences in ICCCM 4.1.2.3 */
         baseismin = this->basew == this->minw && this->baseh == this->minh;
@@ -393,4 +393,53 @@ void Client::unmanage(int destroyed) {
     focus(NULL);
     updateclientlist();
     m->arrange();
+}
+
+void Client::updatesizehints() {
+    long msize;
+    XSizeHints size;
+
+    if (!XGetWMNormalHints(dpy, this->win, &size, &msize)) {
+        /* size is uninitialized, ensure that size.flags aren't used */
+        size.flags = PSize;
+    }
+    if (size.flags & PBaseSize) {
+        this->basew = size.base_width;
+        this->baseh = size.base_height;
+    } else if (size.flags & PMinSize) {
+        this->basew = size.min_width;
+        this->baseh = size.min_height;
+    } else {
+        this->basew = this->baseh = 0;
+    }
+    if (size.flags & PResizeInc) {
+        this->incw = size.width_inc;
+        this->inch = size.height_inc;
+    } else {
+        this->incw = this->inch = 0;
+    }
+    if (size.flags & PMaxSize) {
+        this->maxw = size.max_width;
+        this->maxh = size.max_height;
+    } else {
+        this->maxw = this->maxh = 0;
+    }
+    if (size.flags & PMinSize) {
+        this->minw = size.min_width;
+        this->minh = size.min_height;
+    } else if (size.flags & PBaseSize) {
+        this->minw = size.base_width;
+        this->minh = size.base_height;
+    } else {
+        this->minw = this->minh = 0;
+    }
+    if (size.flags & PAspect) {
+        this->mina = (float)size.min_aspect.y / size.min_aspect.x;
+        this->maxa = (float)size.max_aspect.x / size.max_aspect.y;
+    } else {
+        this->maxa = this->mina = 0.0;
+    }
+    this->isfixed = (this->maxw && this->maxh && this->maxw == this->minw &&
+                     this->maxh == this->minh);
+    this->hintsvalid = 1;
 }

@@ -40,4 +40,5 @@ struct Client {
     void showhide();
     void unfocus(int setfocus) const;
     void unmanage(int destroyed);
+    void updatesizehints();
 };

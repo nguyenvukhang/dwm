@@ -537,7 +537,7 @@ void manage(Window w, XWindowAttributes *wa) {
     c->h = c->oldh = wa->height;
     c->oldbw = wa->border_width;
 
-    updatetitle(c);
+    c->updatetitle();
     if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
         c->mon = t->mon;
         c->tags = t->tags;
@@ -745,7 +745,7 @@ void propertynotify(XEvent *e) {
             break;
         }
         if (ev->atom == XA_WM_NAME || ev->atom == netatom[NetWMName]) {
-            updatetitle(c);
+            c->updatetitle();
             if (c == c->mon->sel) {
                 c->mon->drawbar();
             }
@@ -1273,15 +1273,6 @@ void updatestatus(void) {
         strcpy(stext, "dwm-" VERSION);
     }
     selmon->drawbar();
-}
-
-void updatetitle(Client *c) {
-    if (!gettextprop(c->win, netatom[NetWMName], c->name, sizeof c->name)) {
-        gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
-    }
-    if (c->name[0] == '\0') { /* hack to mark broken clients */
-        strcpy(c->name, broken);
-    }
 }
 
 void updatewindowtype(Client *c) {

@@ -443,3 +443,13 @@ void Client::updatesizehints() {
                      this->maxh == this->minh);
     this->hintsvalid = 1;
 }
+
+void Client::updatetitle() {
+    if (!gettextprop(this->win, netatom[NetWMName], this->name,
+                     sizeof this->name)) {
+        gettextprop(this->win, XA_WM_NAME, this->name, sizeof this->name);
+    }
+    if (this->name[0] == '\0') { /* hack to mark broken clients */
+        strcpy(this->name, broken);
+    }
+}

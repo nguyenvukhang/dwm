@@ -704,13 +704,6 @@ void movemouse(const Arg *arg) {
     }
 }
 
-void pop(Client *c) {
-    c->detach();
-    c->attach();
-    focus(c);
-    c->mon->arrange();
-}
-
 void propertynotify(XEvent *e) {
     Client *c;
     Window trans;
@@ -1657,7 +1650,7 @@ void zoom(const Arg *arg) {
     if (c == selmon->clients->nexttiled() && !(c = c->next->nexttiled())) {
         return;
     }
-    pop(c);
+    c->pop();
 }
 
 int main(int argc, char *argv[]) {

@@ -210,3 +210,10 @@ Client *Client::nexttiled() {
     for (; c && (c->isfloating || !ISVISIBLE(c)); c = c->next);
     return c;
 }
+
+void Client::pop() {
+    this->detach();
+    this->attach();
+    focus(this);
+    this->mon->arrange();
+}

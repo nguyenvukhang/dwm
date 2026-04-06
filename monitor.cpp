@@ -100,3 +100,15 @@ void Monitor::restack() const {
     XSync(dpy, False);
     while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }
+
+void Monitor::updatebarpos() {
+    this->wy = this->my;
+    this->wh = this->mh;
+    if (this->showbar) {
+        this->wh -= bh;
+        this->by = this->topbar ? this->wy : this->wy + this->wh;
+        this->wy = this->topbar ? this->wy + bh : this->wy;
+    } else {
+        this->by = -bh;
+    }
+}

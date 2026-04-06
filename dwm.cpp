@@ -1077,7 +1077,7 @@ void tile(Monitor *m) {
 
 void togglebar(const Arg *arg) {
     selmon->showbar = !selmon->showbar;
-    updatebarpos(selmon);
+    selmon->updatebarpos();
     XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww,
                       bh);
     selmon->arrange();
@@ -1157,18 +1157,6 @@ void updatebars(void) {
     }
 }
 
-void updatebarpos(Monitor *m) {
-    m->wy = m->my;
-    m->wh = m->mh;
-    if (m->showbar) {
-        m->wh -= bh;
-        m->by = m->topbar ? m->wy : m->wy + m->wh;
-        m->wy = m->topbar ? m->wy + bh : m->wy;
-    } else {
-        m->by = -bh;
-    }
-}
-
 void updateclientlist(void) {
     Client *c;
     Monitor *m;
@@ -1223,7 +1211,7 @@ int updategeom(void) {
                 m->my = m->wy = unique[i].y_org;
                 m->mw = m->ww = unique[i].width;
                 m->mh = m->wh = unique[i].height;
-                updatebarpos(m);
+                m->updatebarpos();
             }
         }
         /* removed monitors if n > nn */
@@ -1253,7 +1241,7 @@ int updategeom(void) {
             dirty = 1;
             mons->mw = mons->ww = sw;
             mons->mh = mons->wh = sh;
-            updatebarpos(mons);
+            mons->updatebarpos();
         }
     }
     if (dirty) {

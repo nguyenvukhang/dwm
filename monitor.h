@@ -28,4 +28,5 @@ struct Monitor {
     void arrangemon();
     void drawbar() const;
     void restack() const;
+    void updatebarpos();
 };

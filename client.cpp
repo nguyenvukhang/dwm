@@ -163,6 +163,7 @@ void Client::detachstack() const {
         this->mon->sel = t;
     }
 }
+
 Atom Client::getatomprop(Atom prop) const {
     int format;
     unsigned long nitems, dl;

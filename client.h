@@ -10,20 +10,41 @@ struct Client {
     int x, y, w, h;
     int oldx, oldy, oldw, oldh;
     int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
-    int bw, oldbw;
+    /* Border width. */
+    int bw;
+    /* Old border width. */
+    int oldbw;
+    /* Bitmask of active tags. */
     unsigned int tags;
-    int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
+    int isfixed;
+    int isfloating;
+    int isurgent;
+    int neverfocus;
+    /* Old floating state (previous value for `isfloating`). */
+    int oldstate;
+    int isfullscreen;
+    /* Next client in the linked list of clients. */
     Client *next;
+    /* Next client in the display stack. */
     Client *snext;
     Monitor *mon;
     Window win;
 
     void applyrules();
     int applysizehints(int *x, int *y, int *w, int *h, int interact);
+    /// Attach to the head of the (singly) linked list that is
+    /// `this->mon->clients`.
     void attach();
+    /// Attach to the head of the (singly) linked list that is
+    /// `this->mon->stack`.
     void attachstack();
     void configure() const;
+    /// Removes this client from the (singly) linked list that is
+    /// `this->mon->clients`.
     void detach() const;
+    /// Removes this client from the (singly) linked list that is
+    /// `this->mon->stack`. And if it's the selected one, chose the next visible
+    /// client in the stack to be selected.
     void detachstack() const;
     Atom getatomprop(Atom prop) const;
     void grabbuttons(int focused) const;

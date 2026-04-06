@@ -241,3 +241,27 @@ void Client::resizeclient(int x, int y, int w, int h) {
     this->configure();
     XSync(dpy, False);
 }
+
+int Client::sendevent(Atom proto) const {
+    int n;
+    Atom *protocols;
+    int exists = 0;
+    XEvent ev;
+
+    if (XGetWMProtocols(dpy, this->win, &protocols, &n)) {
+        while (!exists && n--) {
+            exists = protocols[n] == proto;
+        }
+        XFree(protocols);
+    }
+    if (exists) {
+        ev.type = ClientMessage;
+        ev.xclient.window = this->win;
+        ev.xclient.message_type = wmatom[WMProtocols];
+        ev.xclient.format = 32;
+        ev.xclient.data.l[0] = proto;
+        ev.xclient.data.l[1] = CurrentTime;
+        XSendEvent(dpy, this->win, False, NoEventMask, &ev);
+    }
+    return exists;
+}

@@ -503,7 +503,7 @@ void killclient(const Arg *arg) {
     if (!selmon->sel) {
         return;
     }
-    if (!sendevent(selmon->sel, wmatom[WMDelete])) {
+    if (!selmon->sel->sendevent(wmatom[WMDelete])) {
         XGrabServer(dpy);
         XSetErrorHandler(xerrordummy);
         XSetCloseDownMode(dpy, DestroyAll);
@@ -892,37 +892,13 @@ void setclientstate(Client *c, long state) {
                     PropModeReplace, (unsigned char *)data, 2);
 }
 
-int sendevent(Client *c, Atom proto) {
-    int n;
-    Atom *protocols;
-    int exists = 0;
-    XEvent ev;
-
-    if (XGetWMProtocols(dpy, c->win, &protocols, &n)) {
-        while (!exists && n--) {
-            exists = protocols[n] == proto;
-        }
-        XFree(protocols);
-    }
-    if (exists) {
-        ev.type = ClientMessage;
-        ev.xclient.window = c->win;
-        ev.xclient.message_type = wmatom[WMProtocols];
-        ev.xclient.format = 32;
-        ev.xclient.data.l[0] = proto;
-        ev.xclient.data.l[1] = CurrentTime;
-        XSendEvent(dpy, c->win, False, NoEventMask, &ev);
-    }
-    return exists;
-}
-
 void setfocus(Client *c) {
     if (!c->neverfocus) {
         XSetInputFocus(dpy, c->win, RevertToPointerRoot, CurrentTime);
     }
     XChangeProperty(dpy, root, netatom[NetActiveWindow], XA_WINDOW, 32,
                     PropModeReplace, (unsigned char *)&c->win, 1);
-    sendevent(c, wmatom[WMTakeFocus]);
+    c->sendevent(wmatom[WMTakeFocus]);
 }
 
 void setfullscreen(Client *c, int fullscreen) {

@@ -299,3 +299,31 @@ void Client::setfocus() const {
                     PropModeReplace, (unsigned char *)&this->win, 1);
     this->sendevent(wmatom[WMTakeFocus]);
 }
+
+void Client::setfullscreen(int fullscreen) {
+    if (fullscreen && !this->isfullscreen) {
+        XChangeProperty(dpy, this->win, netatom[NetWMState], XA_ATOM, 32,
+                        PropModeReplace,
+                        (unsigned char *)&netatom[NetWMFullscreen], 1);
+        this->isfullscreen = 1;
+        this->oldstate = this->isfloating;
+        this->oldbw = this->bw;
+        this->bw = 0;
+        this->isfloating = 1;
+        this->resizeclient(this->mon->mx, this->mon->my, this->mon->mw,
+                           this->mon->mh);
+        XRaiseWindow(dpy, this->win);
+    } else if (!fullscreen && this->isfullscreen) {
+        XChangeProperty(dpy, this->win, netatom[NetWMState], XA_ATOM, 32,
+                        PropModeReplace, (unsigned char *)0, 0);
+        this->isfullscreen = 0;
+        this->isfloating = this->oldstate;
+        this->bw = this->oldbw;
+        this->x = this->oldx;
+        this->y = this->oldy;
+        this->w = this->oldw;
+        this->h = this->oldh;
+        this->resizeclient(this->x, this->y, this->w, this->h);
+        this->mon->arrange();
+    }
+}

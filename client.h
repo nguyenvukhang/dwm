@@ -35,4 +35,5 @@ struct Client {
     void sendmon(Monitor *);
     void setclientstate(long state) const;
     void setfocus() const;
+    void setfullscreen(int fullscreen);
 };

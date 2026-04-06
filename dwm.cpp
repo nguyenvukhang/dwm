@@ -88,7 +88,7 @@ void cleanup(void) {
     selmon->lt[selmon->sellt] = &foo;
     for (m = mons; m; m = m->next) {
         while (m->stack) {
-            unmanage(m->stack, 0);
+            m->stack->unmanage(0);
         }
     }
     XUngrabKey(dpy, AnyKey, AnyModifier, root);
@@ -250,7 +250,7 @@ void destroynotify(XEvent *e) {
     XDestroyWindowEvent *ev = &e->xdestroywindow;
 
     if ((c = wintoclient(ev->window))) {
-        unmanage(c, 1);
+        c->unmanage(1);
     }
 }
 
@@ -1123,30 +1123,6 @@ void toggleview(const Arg *arg) {
     }
 }
 
-void unmanage(Client *c, int destroyed) {
-    Monitor *m = c->mon;
-    XWindowChanges wc;
-
-    c->detach();
-    c->detachstack();
-    if (!destroyed) {
-        wc.border_width = c->oldbw;
-        XGrabServer(dpy); /* avoid race conditions */
-        XSetErrorHandler(xerrordummy);
-        XSelectInput(dpy, c->win, NoEventMask);
-        XConfigureWindow(dpy, c->win, CWBorderWidth, &wc); /* restore border */
-        XUngrabButton(dpy, AnyButton, AnyModifier, c->win);
-        c->setclientstate(WithdrawnState);
-        XSync(dpy, False);
-        XSetErrorHandler(xerror);
-        XUngrabServer(dpy);
-    }
-    free(c);
-    focus(NULL);
-    updateclientlist();
-    m->arrange();
-}
-
 void unmapnotify(XEvent *e) {
     Client *c;
     XUnmapEvent *ev = &e->xunmap;
@@ -1155,7 +1131,7 @@ void unmapnotify(XEvent *e) {
         if (ev->send_event) {
             c->setclientstate(WithdrawnState);
         } else {
-            unmanage(c, 0);
+            c->unmanage(0);
         }
     }
 }

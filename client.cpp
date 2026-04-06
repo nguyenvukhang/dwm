@@ -369,3 +369,28 @@ void Client::unfocus(int setfocus) const {
         XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
     }
 }
+
+void Client::unmanage(int destroyed) {
+    Monitor *m = this->mon;
+    XWindowChanges wc;
+
+    this->detach();
+    this->detachstack();
+    if (!destroyed) {
+        wc.border_width = this->oldbw;
+        XGrabServer(dpy); /* avoid race conditions */
+        XSetErrorHandler(xerrordummy);
+        XSelectInput(dpy, this->win, NoEventMask);
+        XConfigureWindow(dpy, this->win, CWBorderWidth,
+                         &wc); /* restore border */
+        XUngrabButton(dpy, AnyButton, AnyModifier, this->win);
+        this->setclientstate(WithdrawnState);
+        XSync(dpy, False);
+        XSetErrorHandler(xerror);
+        XUngrabServer(dpy);
+    }
+    free(this);
+    focus(NULL);
+    updateclientlist();
+    m->arrange();
+}

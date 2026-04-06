@@ -39,4 +39,5 @@ struct Client {
     void seturgent(int urg);
     void showhide();
     void unfocus(int setfocus) const;
+    void unmanage(int destroyed);
 };

@@ -290,3 +290,12 @@ void Client::setclientstate(long state) const {
     XChangeProperty(dpy, this->win, wmatom[WMState], wmatom[WMState], 32,
                     PropModeReplace, (unsigned char *)data, 2);
 }
+
+void Client::setfocus() const {
+    if (!this->neverfocus) {
+        XSetInputFocus(dpy, this->win, RevertToPointerRoot, CurrentTime);
+    }
+    XChangeProperty(dpy, root, netatom[NetActiveWindow], XA_WINDOW, 32,
+                    PropModeReplace, (unsigned char *)&this->win, 1);
+    this->sendevent(wmatom[WMTakeFocus]);
+}

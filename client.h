@@ -34,4 +34,5 @@ struct Client {
     int sendevent(Atom proto) const;
     void sendmon(Monitor *);
     void setclientstate(long state) const;
+    void setfocus() const;
 };

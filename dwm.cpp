@@ -321,7 +321,7 @@ void focus(Client *c) {
         c->attachstack();
         c->grabbuttons(1);
         XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
-        setfocus(c);
+        c->setfocus();
     } else {
         XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
         XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
@@ -335,7 +335,7 @@ void focusin(XEvent *e) {
     XFocusChangeEvent *ev = &e->xfocus;
 
     if (selmon->sel && ev->window != selmon->sel->win) {
-        setfocus(selmon->sel);
+        selmon->sel->setfocus();
     }
 }
 
@@ -865,15 +865,6 @@ void scan(void) {
             XFree(wins);
         }
     }
-}
-
-void setfocus(Client *c) {
-    if (!c->neverfocus) {
-        XSetInputFocus(dpy, c->win, RevertToPointerRoot, CurrentTime);
-    }
-    XChangeProperty(dpy, root, netatom[NetActiveWindow], XA_WINDOW, 32,
-                    PropModeReplace, (unsigned char *)&c->win, 1);
-    c->sendevent(wmatom[WMTakeFocus]);
 }
 
 void setfullscreen(Client *c, int fullscreen) {

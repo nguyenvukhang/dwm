@@ -562,7 +562,7 @@ void manage(Window w, XWindowAttributes *wa) {
     c->configure(); /* propagates border_width, if size doesn't change */
     c->updatewindowtype();
     c->updatesizehints();
-    updatewmhints(c);
+    c->updatewmhints();
     XSelectInput(dpy, w,
                  EnterWindowMask | FocusChangeMask | PropertyChangeMask |
                      StructureNotifyMask);
@@ -740,7 +740,7 @@ void propertynotify(XEvent *e) {
             c->hintsvalid = 0;
             break;
         case XA_WM_HINTS:
-            updatewmhints(c);
+            c->updatewmhints();
             drawbars();
             break;
         }
@@ -1273,25 +1273,6 @@ void updatestatus(void) {
         strcpy(stext, "dwm-" VERSION);
     }
     selmon->drawbar();
-}
-
-void updatewmhints(Client *c) {
-    XWMHints *wmh;
-
-    if ((wmh = XGetWMHints(dpy, c->win))) {
-        if (c == selmon->sel && wmh->flags & XUrgencyHint) {
-            wmh->flags &= ~XUrgencyHint;
-            XSetWMHints(dpy, c->win, wmh);
-        } else {
-            c->isurgent = (wmh->flags & XUrgencyHint) ? 1 : 0;
-        }
-        if (wmh->flags & InputHint) {
-            c->neverfocus = !wmh->input;
-        } else {
-            c->neverfocus = 0;
-        }
-        XFree(wmh);
-    }
 }
 
 void view(const Arg *arg) {

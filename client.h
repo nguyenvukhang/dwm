@@ -43,4 +43,5 @@ struct Client {
     void updatesizehints();
     void updatetitle();
     void updatewindowtype();
+    void updatewmhints();
 };

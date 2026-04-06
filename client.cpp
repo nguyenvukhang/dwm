@@ -465,3 +465,22 @@ void Client::updatewindowtype() {
         this->isfloating = 1;
     }
 }
+
+void Client::updatewmhints() {
+    XWMHints *wmh;
+
+    if ((wmh = XGetWMHints(dpy, this->win))) {
+        if (this == selmon->sel && wmh->flags & XUrgencyHint) {
+            wmh->flags &= ~XUrgencyHint;
+            XSetWMHints(dpy, this->win, wmh);
+        } else {
+            this->isurgent = (wmh->flags & XUrgencyHint) ? 1 : 0;
+        }
+        if (wmh->flags & InputHint) {
+            this->neverfocus = !wmh->input;
+        } else {
+            this->neverfocus = 0;
+        }
+        XFree(wmh);
+    }
+}

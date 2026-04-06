@@ -220,6 +220,24 @@ void Client::pop() {
 
 void Client::resize(int x, int y, int w, int h, int interact) {
     if (this->applysizehints(&x, &y, &w, &h, interact)) {
-        resizeclient(this, x, y, w, h);
+        this->resizeclient(x, y, w, h);
     }
+}
+
+void Client::resizeclient(int x, int y, int w, int h) {
+    XWindowChanges wc;
+
+    this->oldx = this->x;
+    this->x = wc.x = x;
+    this->oldy = this->y;
+    this->y = wc.y = y;
+    this->oldw = this->w;
+    this->w = wc.width = w;
+    this->oldh = this->h;
+    this->h = wc.height = h;
+    wc.border_width = this->bw;
+    XConfigureWindow(dpy, this->win,
+                     CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
+    this->configure();
+    XSync(dpy, False);
 }

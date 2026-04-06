@@ -158,7 +158,7 @@ void configurenotify(XEvent *e) {
             for (m = mons; m; m = m->next) {
                 for (c = m->clients; c; c = c->next) {
                     if (c->isfullscreen) {
-                        resizeclient(c, m->mx, m->my, m->mw, m->mh);
+                        c->resizeclient(m->mx, m->my, m->mw, m->mh);
                     }
                 }
                 XMoveResizeWindow(dpy, m->barwin, m->wx, m->by, m->ww, bh);
@@ -758,24 +758,6 @@ Monitor *recttomon(int x, int y, int w, int h) {
     return r;
 }
 
-void resizeclient(Client *c, int x, int y, int w, int h) {
-    XWindowChanges wc;
-
-    c->oldx = c->x;
-    c->x = wc.x = x;
-    c->oldy = c->y;
-    c->y = wc.y = y;
-    c->oldw = c->w;
-    c->w = wc.width = w;
-    c->oldh = c->h;
-    c->h = wc.height = h;
-    wc.border_width = c->bw;
-    XConfigureWindow(dpy, c->win,
-                     CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
-    c->configure();
-    XSync(dpy, False);
-}
-
 void resizemouse(const Arg *arg) {
     int ocx, ocy, nw, nh;
     Client *c;
@@ -923,7 +905,7 @@ void sendmon(Client *c, Monitor *m) {
     c->attach();
     c->attachstack();
     if (c->isfullscreen) {
-        resizeclient(c, m->mx, m->my, m->mw, m->mh);
+        c->resizeclient(m->mx, m->my, m->mw, m->mh);
     }
     focus(NULL);
     arrange();
@@ -979,7 +961,7 @@ void setfullscreen(Client *c, int fullscreen) {
         c->oldbw = c->bw;
         c->bw = 0;
         c->isfloating = 1;
-        resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
+        c->resizeclient(c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
         XRaiseWindow(dpy, c->win);
     } else if (!fullscreen && c->isfullscreen) {
         XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
@@ -991,7 +973,7 @@ void setfullscreen(Client *c, int fullscreen) {
         c->y = c->oldy;
         c->w = c->oldw;
         c->h = c->oldh;
-        resizeclient(c, c->x, c->y, c->w, c->h);
+        c->resizeclient(c->x, c->y, c->w, c->h);
         c->mon->arrange();
     }
 }

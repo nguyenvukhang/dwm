@@ -327,3 +327,16 @@ void Client::setfullscreen(int fullscreen) {
         this->mon->arrange();
     }
 }
+
+void Client::seturgent(int urg) {
+    XWMHints *wmh;
+
+    this->isurgent = urg;
+    if (!(wmh = XGetWMHints(dpy, this->win))) {
+        return;
+    }
+    wmh->flags =
+        urg ? (wmh->flags | XUrgencyHint) : (wmh->flags & ~XUrgencyHint);
+    XSetWMHints(dpy, this->win, wmh);
+    XFree(wmh);
+}

@@ -36,4 +36,5 @@ struct Client {
     void setclientstate(long state) const;
     void setfocus() const;
     void setfullscreen(int fullscreen);
+    void seturgent(int urg);
 };

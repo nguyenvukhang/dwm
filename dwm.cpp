@@ -135,7 +135,7 @@ void clientmessage(XEvent *e) {
         }
     } else if (cme->message_type == netatom[NetActiveWindow]) {
         if (c != selmon->sel && !c->isurgent) {
-            seturgent(c, 1);
+            c->seturgent(1);
         }
     }
 }
@@ -314,7 +314,7 @@ void focus(Client *c) {
             selmon = c->mon;
         }
         if (c->isurgent) {
-            seturgent(c, 0);
+            c->seturgent(0);
         }
         c->detachstack();
         c->attachstack();
@@ -989,19 +989,6 @@ void setup(void) {
     XSelectInput(dpy, root, wa.event_mask);
     grabkeys();
     focus(NULL);
-}
-
-void seturgent(Client *c, int urg) {
-    XWMHints *wmh;
-
-    c->isurgent = urg;
-    if (!(wmh = XGetWMHints(dpy, c->win))) {
-        return;
-    }
-    wmh->flags =
-        urg ? (wmh->flags | XUrgencyHint) : (wmh->flags & ~XUrgencyHint);
-    XSetWMHints(dpy, c->win, wmh);
-    XFree(wmh);
 }
 
 void showhide(Client *c) {

@@ -27,4 +27,5 @@ struct Monitor {
     void arrange();
     void arrangemon();
     void drawbar() const;
+    void restack() const;
 };

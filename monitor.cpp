@@ -4,7 +4,7 @@
 void Monitor::arrange() {
     showhide(this->stack);
     this->arrangemon();
-    restack(this);
+    this->restack();
 }
 
 void Monitor::arrangemon() {
@@ -71,4 +71,30 @@ void Monitor::drawbar() const {
         }
     }
     drw_map(drw, this->barwin, 0, 0, this->ww, bh);
+}
+
+void Monitor::restack() const {
+    Client *c;
+    XEvent ev;
+    XWindowChanges wc;
+
+    this->drawbar();
+    if (!this->sel) {
+        return;
+    }
+    if (this->sel->isfloating || !this->lt[this->sellt]->arrange) {
+        XRaiseWindow(dpy, this->sel->win);
+    }
+    if (this->lt[this->sellt]->arrange) {
+        wc.stack_mode = Below;
+        wc.sibling = this->barwin;
+        for (c = this->stack; c; c = c->snext) {
+            if (!c->isfloating && ISVISIBLE(c)) {
+                XConfigureWindow(dpy, c->win, CWSibling | CWStackMode, &wc);
+                wc.sibling = c->win;
+            }
+        }
+    }
+    XSync(dpy, False);
+    while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }

@@ -50,7 +50,7 @@ void buttonpress(XEvent *e) {
         }
     } else if ((c = wintoclient(ev->window))) {
         focus(c);
-        restack(selmon);
+        selmon->restack();
         XAllowEvents(dpy, ReplayPointer, CurrentTime);
         click = ClkClientWin;
     }
@@ -380,7 +380,7 @@ void focusstack(const Arg *arg) {
     }
     if (c) {
         focus(c);
-        restack(selmon);
+        selmon->restack();
     }
 }
 
@@ -647,7 +647,7 @@ void movemouse(const Arg *arg) {
     if (c->isfullscreen) { /* no support moving fullscreen windows by mouse */
         return;
     }
-    restack(selmon);
+    selmon->restack();
     ocx = c->x;
     ocy = c->y;
     if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
@@ -771,7 +771,7 @@ void resizemouse(const Arg *arg) {
     if (c->isfullscreen) { /* no support resizing fullscreen windows by mouse */
         return;
     }
-    restack(selmon);
+    selmon->restack();
     ocx = c->x;
     ocy = c->y;
     if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
@@ -821,32 +821,6 @@ void resizemouse(const Arg *arg) {
         selmon = m;
         focus(NULL);
     }
-}
-
-void restack(Monitor *m) {
-    Client *c;
-    XEvent ev;
-    XWindowChanges wc;
-
-    m->drawbar();
-    if (!m->sel) {
-        return;
-    }
-    if (m->sel->isfloating || !m->lt[m->sellt]->arrange) {
-        XRaiseWindow(dpy, m->sel->win);
-    }
-    if (m->lt[m->sellt]->arrange) {
-        wc.stack_mode = Below;
-        wc.sibling = m->barwin;
-        for (c = m->stack; c; c = c->snext) {
-            if (!c->isfloating && ISVISIBLE(c)) {
-                XConfigureWindow(dpy, c->win, CWSibling | CWStackMode, &wc);
-                wc.sibling = c->win;
-            }
-        }
-    }
-    XSync(dpy, False);
-    while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }
 
 void run(void) {

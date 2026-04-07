@@ -1,3 +1,5 @@
+#pragma once
+
 #include "dtypes.h"
 
 /* See LICENSE file for copyright and license details. */

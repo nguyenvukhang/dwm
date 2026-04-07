@@ -20,6 +20,9 @@
  *
  * To understand everything else, start reading main().
  */
+
+#pragma once
+
 #include <X11/XKBlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>

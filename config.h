@@ -14,11 +14,13 @@ static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
 static const char col_gray4[]       = "#eeeeee";
-static const char col_accent[]      = "#d8b4fe";
+static const char col_accent_400[]  = "#d8b4fe";
+static const char col_accent_900[]  = "#581c87";
 static const char *COLORS[][3]      = {
-	/*               fg          bg           border   */
-	[SchemeNorm] = { col_gray3,  col_gray1,   col_gray2   },
-	[SchemeSel]  = { col_gray1,  col_accent,  col_accent  },
+	/*               fg          bg               border   */
+	[SchemeNorm] = { col_gray3,  col_gray1,       col_gray2      },
+	[SchemeSel]  = { col_gray1,  col_accent_400,  col_accent_400 },
+	[SchemeBar]  = { col_gray3,  col_gray2,       col_gray2      },
 };
 
 /* tagging */

@@ -61,7 +61,7 @@ void Monitor::drawbar() const {
 
     if ((w = this->ww - tw - x) > bh) {
         if (this->sel) {
-            drw_setscheme(drw, scheme[this == selmon ? SchemeSel : SchemeNorm]);
+            drw_setscheme(drw, scheme[this == selmon ? SchemeBar : SchemeNorm]);
             drw_text(drw, x, 0, w, bh, lrpad / 2, this->sel->name, 0);
             if (this->sel->isfloating) {
                 drw_rect(drw, x + boxs, boxs, boxw, boxw, this->sel->isfixed,

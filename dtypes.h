@@ -20,7 +20,7 @@
 
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel };                  /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeBar };       /* color schemes */
 enum {
     NetSupported,
     NetWMName,

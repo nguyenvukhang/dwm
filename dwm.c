@@ -911,7 +911,11 @@ void motionnotify(XEvent *e) {
 }
 
 void movemouse(const Arg *arg) {
-    int x, y, ocx, ocy, nx, ny;
+    // Old client x-coordinate.
+    int ocx;
+    // Old client y-coordinate.
+    int ocy;
+    int x, y, nx, ny;
     Client *c;
     Monitor *m;
     XEvent ev;
@@ -1072,7 +1076,11 @@ void resizeclient(Client *c, int x, int y, int w, int h) {
 }
 
 void resizemouse(const Arg *arg) {
-    int ocx, ocy, nw, nh;
+    // Old client x-coordinate.
+    int ocx;
+    // Old client y-coordinate.
+    int ocy;
+    int nw, nh;
     Client *c;
     Monitor *m;
     XEvent ev;
@@ -1092,8 +1100,13 @@ void resizemouse(const Arg *arg) {
                      CurrentTime) != GrabSuccess) {
         return;
     }
-    XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1,
-                 c->h + c->bw - 1);
+    if (c->isfloating) {
+        XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1,
+                     c->h + c->bw - 1);
+    } else {
+        XWarpPointer(dpy, None, selmon->barwin, 0, 0, 0, 0,
+                     selmon->mfact * selmon->mw, selmon->mh / 2);
+    }
     do {
         XMaskEvent(dpy, MOUSEMASK | ExposureMask | SubstructureRedirectMask,
                    &ev);
@@ -1111,10 +1124,16 @@ void resizemouse(const Arg *arg) {
 
             nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
             nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
-            if (c->mon->wx + nw >= selmon->wx &&
-                c->mon->wx + nw <= selmon->wx + selmon->ww &&
-                c->mon->wy + nh >= selmon->wy &&
-                c->mon->wy + nh <= selmon->wy + selmon->wh) {
+            if (!c->isfloating) {
+                float f = (float)ev.xmotion.x / (float)selmon->mw;
+                if (f >= 0.05 && f <= 0.95) {
+                    selmon->mfact = f;
+                    arrange(selmon);
+                }
+            } else if (c->mon->wx + nw >= selmon->wx &&
+                       c->mon->wx + nw <= selmon->wx + selmon->ww &&
+                       c->mon->wy + nh >= selmon->wy &&
+                       c->mon->wy + nh <= selmon->wy + selmon->wh) {
                 if (!c->isfloating && selmon->lt[selmon->sellt]->arrange &&
                     (abs(nw - c->w) > snap || abs(nh - c->h) > snap)) {
                     togglefloating(NULL);
@@ -1126,8 +1145,10 @@ void resizemouse(const Arg *arg) {
             break;
         }
     } while (ev.type != ButtonRelease);
-    XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1,
-                 c->h + c->bw - 1);
+    if (c->isfloating) {
+        XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1,
+                     c->h + c->bw - 1);
+    }
     XUngrabPointer(dpy, CurrentTime);
     while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
     if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {

@@ -28,7 +28,7 @@ target_compile_definitions(dwm PUBLIC _BSD_SOURCE)
 target_compile_definitions(dwm PUBLIC _XOPEN_SOURCE=700L)
 
 # Xinerama, comment if you don't want it
-target_compile_definitions(dwm PUBLIC XINERAMA)
-target_link_libraries(dwm PRIVATE X11::Xinerama)
+# target_compile_definitions(dwm PUBLIC XINERAMA)
+# # target_link_libraries(dwm PRIVATE X11::Xinerama)
 
 install(TARGETS dwm)

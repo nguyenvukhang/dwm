@@ -31,7 +31,7 @@ void Monitor::drawbar() const {
     if (this == selmon) { /* status is only drawn on selected monitor */
         drw_setscheme(drw, scheme[SchemeNorm]);
         tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
-        drw_text(drw, this->ww - tw, 0, tw, bh, 0, stext, 0);
+        drw_text(drw, this->w.w - tw, 0, tw, bh, 0, stext, 0);
     }
 
     for (c = this->clients; c; c = c->next) {
@@ -59,7 +59,7 @@ void Monitor::drawbar() const {
     drw_setscheme(drw, scheme[SchemeNorm]);
     x = drw_text(drw, x, 0, w, bh, lrpad / 2, this->ltsymbol, 0);
 
-    if ((w = this->ww - tw - x) > bh) {
+    if ((w = this->w.w - tw - x) > bh) {
         if (this->sel) {
             drw_setscheme(drw, scheme[this == selmon ? SchemeBar : SchemeNorm]);
             drw_text(drw, x, 0, w, bh, lrpad / 2, this->sel->name, 0);
@@ -72,7 +72,7 @@ void Monitor::drawbar() const {
             drw_rect(drw, x, 0, w, bh, 1, 1);
         }
     }
-    drw_map(drw, this->barwin, 0, 0, this->ww, bh);
+    drw_map(drw, this->barwin, 0, 0, this->w.w, bh);
 }
 
 void Monitor::restack() const {
@@ -102,12 +102,12 @@ void Monitor::restack() const {
 }
 
 void Monitor::updatebarpos() {
-    this->wy = this->my;
-    this->wh = this->mh;
+    this->w.y = this->m.y;
+    this->w.h = this->m.h;
     if (this->showbar) {
-        this->wh -= bh;
-        this->by = this->topbar ? this->wy : this->wy + this->wh;
-        this->wy = this->topbar ? this->wy + bh : this->wy;
+        this->w.h -= bh;
+        this->by = this->topbar ? this->w.y : this->w.y + this->w.h;
+        this->w.y = this->topbar ? this->w.y + bh : this->w.y;
     } else {
         this->by = -bh;
     }

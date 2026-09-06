@@ -9,38 +9,27 @@ struct Monitor {
     float mfact;
     int nmaster;
     int num;
-    /* Bar geometry. */
+    /// Bar geometry.
     int by;
-    /* Screen size: x-coordinate. */
-    int mx;
-    /* Screen size: y-coordinate. */
-    int my;
-    /* Screen size: width. */
-    int mw;
-    /* Screen size: height. */
-    int mh;
-    /* Window area: x-coordinate. */
-    int wx;
-    /* Window area: y-coordinate. */
-    int wy;
-    /* Window area: width. */
-    int ww;
-    /* Window area: height. */
-    int wh;
-    /* Bitmask of selected tags. */
+    /// The Rect that every pixel on the monitor lives in.
+    Rect m;
+    /// The Rect that windows live in. This is simply the monitor's Rect minus
+    /// the status bar's Rect.
+    Rect w;
+    /// Bitmask of selected tags.
     unsigned int seltags;
-    /* Index of selected layout. */
+    /// Index of selected layout.
     unsigned int sellt;
     unsigned int tagset[2];
-    /* 0 means no bar. */
+    /// 0 means no bar.
     int showbar;
-    /* 0 means bottom bar. */
+    /// 0 means bottom bar.
     int topbar;
-    /* Linked list of clients. */
+    /// Linked list of clients.
     Client *clients;
-    /* Selected client. */
+    /// Selected client.
     Client *sel;
-    /* Clients ordered by stack. */
+    /// Clients ordered by stack.
     Client *stack;
     Monitor *next;
     Window barwin;

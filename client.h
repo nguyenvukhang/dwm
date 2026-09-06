@@ -19,34 +19,33 @@ struct SizeHinted {
     float mina;
 };
 
-struct Client : private SizeHinted {
+struct Client : private SizeHinted, Rect {
     char name[256];
 
-    int x, y, w, h;
     int oldx, oldy, oldw, oldh;
     int hintsvalid;
-    /* Border width. */
+    /// Border width.
     int bw;
-    /* Old border width. */
+    /// Old border width.
     int oldbw;
-    /* Bitmask of active tags. */
+    /// Bitmask of active tags.
     unsigned int tags;
     int isfixed;
     int isfloating;
     int isurgent;
     int neverfocus;
-    /* Old floating state (previous value for `isfloating`). */
+    /// Old floating state (previous value for `isfloating`).
     int oldstate;
     int isfullscreen;
-    /* Next client in the linked list of clients. */
+    /// Next client in the linked list of clients.
     Client *next;
-    /* Next client in the display stack. */
+    /// Next client in the display stack.
     Client *snext;
     Monitor *mon;
     Window win;
 
     void applyrules();
-    int applysizehints(int *x, int *y, int *w, int *h, int interact);
+    bool applysizehints(Rect &, int interact);
     /// Attach to the head of the (singly) linked list that is
     /// `this->mon->clients`.
     void attach();
@@ -65,8 +64,8 @@ struct Client : private SizeHinted {
     void grabbuttons(int focused) const;
     Client *nexttiled();
     void pop();
-    void resize(int x, int y, int w, int h, int interact);
-    void resizeclient(int x, int y, int w, int h);
+    void resize(Rect, bool interact);
+    void resizeclient(const Rect *);
     int sendevent(Atom proto) const;
     void sendmon(Monitor *);
     void setclientstate(long state) const;

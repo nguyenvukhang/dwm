@@ -37,45 +37,45 @@ void Client::applyrules() {
     tags = tags & TAGMASK ? tags & TAGMASK : mon->tagset[mon->seltags];
 }
 
-int Client::applysizehints(int *x, int *y, int *w, int *h, int interact) {
+bool Client::applysizehints(Rect &rect, int interact) {
     int baseismin;
     Monitor *m = this->mon;
 
     /* set minimum possible */
-    *w = MAX(1, *w);
-    *h = MAX(1, *h);
+    rect.w = MAX(1, rect.w);
+    rect.h = MAX(1, rect.h);
     if (interact) {
-        if (*x > sw) {
-            *x = sw - WIDTH(this);
+        if (rect.x > sw) {
+            rect.x = sw - WIDTH(this);
         }
-        if (*y > sh) {
-            *y = sh - HEIGHT(this);
+        if (rect.y > sh) {
+            rect.y = sh - HEIGHT(this);
         }
-        if (*x + *w + 2 * this->bw < 0) {
-            *x = 0;
+        if (rect.x + rect.w + 2 * this->bw < 0) {
+            rect.x = 0;
         }
-        if (*y + *h + 2 * this->bw < 0) {
-            *y = 0;
+        if (rect.y + rect.h + 2 * this->bw < 0) {
+            rect.y = 0;
         }
     } else {
-        if (*x >= m->wx + m->ww) {
-            *x = m->wx + m->ww - WIDTH(this);
+        if (rect.x >= m->w.x + m->w.w) {
+            rect.x = m->w.x + m->w.w - WIDTH(this);
         }
-        if (*y >= m->wy + m->wh) {
-            *y = m->wy + m->wh - HEIGHT(this);
+        if (rect.y >= m->w.y + m->w.h) {
+            rect.y = m->w.y + m->w.h - HEIGHT(this);
         }
-        if (*x + *w + 2 * this->bw <= m->wx) {
-            *x = m->wx;
+        if (rect.x + rect.w + 2 * this->bw <= m->w.x) {
+            rect.x = m->w.x;
         }
-        if (*y + *h + 2 * this->bw <= m->wy) {
-            *y = m->wy;
+        if (rect.y + rect.h + 2 * this->bw <= m->w.y) {
+            rect.y = m->w.y;
         }
     }
-    if (*h < bh) {
-        *h = bh;
+    if (rect.h < bh) {
+        rect.h = bh;
     }
-    if (*w < bh) {
-        *w = bh;
+    if (rect.w < bh) {
+        rect.w = bh;
     }
     if (resizehints || this->isfloating ||
         !this->mon->lt[this->mon->sellt]->arrange) {
@@ -85,39 +85,39 @@ int Client::applysizehints(int *x, int *y, int *w, int *h, int interact) {
         /* see last two sentences in ICCCM 4.1.2.3 */
         baseismin = this->base == this->min;
         if (!baseismin) { /* temporarily remove base dimensions */
-            *w -= this->base.w;
-            *h -= this->base.h;
+            rect.w -= this->base.w;
+            rect.h -= this->base.h;
         }
         /* adjust for aspect limits */
         if (this->mina > 0 && this->maxa > 0) {
-            if (this->maxa < (float)*w / *h) {
-                *w = *h * this->maxa + 0.5;
-            } else if (this->mina < (float)*h / *w) {
-                *h = *w * this->mina + 0.5;
+            if (this->maxa < (float)rect.w / rect.h) {
+                rect.w = rect.h * this->maxa + 0.5;
+            } else if (this->mina < (float)rect.h / rect.w) {
+                rect.h = rect.w * this->mina + 0.5;
             }
         }
         if (baseismin) { /* increment calculation requires this */
-            *w -= this->base.w;
-            *h -= this->base.h;
+            rect.w -= this->base.w;
+            rect.h -= this->base.h;
         }
         /* adjust for increment value */
         if (this->inc.w) {
-            *w -= *w % this->inc.w;
+            rect.w -= rect.w % this->inc.w;
         }
         if (this->inc.h) {
-            *h -= *h % this->inc.h;
+            rect.h -= rect.h % this->inc.h;
         }
         /* restore base dimensions */
-        *w = MAX(*w + this->base.w, this->min.w);
-        *h = MAX(*h + this->base.h, this->min.h);
+        rect.w = MAX(rect.w + this->base.w, this->min.w);
+        rect.h = MAX(rect.h + this->base.h, this->min.h);
         if (this->max.w) {
-            *w = MIN(*w, this->max.w);
+            rect.w = MIN(rect.w, this->max.w);
         }
         if (this->max.h) {
-            *h = MIN(*h, this->max.h);
+            rect.h = MIN(rect.h, this->max.h);
         }
     }
-    return *x != this->x || *y != this->y || *w != this->w || *h != this->h;
+    return !rect.equals(this);
 }
 
 void Client::attach() {
@@ -219,23 +219,23 @@ void Client::pop() {
     this->mon->arrange();
 }
 
-void Client::resize(int x, int y, int w, int h, int interact) {
-    if (this->applysizehints(&x, &y, &w, &h, interact)) {
-        this->resizeclient(x, y, w, h);
+void Client::resize(Rect rect, bool interact) {
+    if (this->applysizehints(rect, interact)) {
+        this->resizeclient(&rect);
     }
 }
 
-void Client::resizeclient(int x, int y, int w, int h) {
+void Client::resizeclient(const Rect *r) {
     XWindowChanges wc;
 
     this->oldx = this->x;
-    this->x = wc.x = x;
+    this->x = wc.x = r->x;
     this->oldy = this->y;
-    this->y = wc.y = y;
+    this->y = wc.y = r->y;
     this->oldw = this->w;
-    this->w = wc.width = w;
+    this->w = wc.width = r->w;
     this->oldh = this->h;
-    this->h = wc.height = h;
+    this->h = wc.height = r->h;
     wc.border_width = this->bw;
     XConfigureWindow(dpy, this->win,
                      CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
@@ -279,7 +279,7 @@ void Client::sendmon(Monitor *m) {
     this->attach();
     this->attachstack();
     if (this->isfullscreen) {
-        this->resizeclient(m->mx, m->my, m->mw, m->mh);
+        this->resizeclient(&m->m);
     }
     focus(NULL);
     arrange();
@@ -311,8 +311,7 @@ void Client::setfullscreen(int fullscreen) {
         this->oldbw = this->bw;
         this->bw = 0;
         this->isfloating = 1;
-        this->resizeclient(this->mon->mx, this->mon->my, this->mon->mw,
-                           this->mon->mh);
+        this->resizeclient(&this->mon->m);
         XRaiseWindow(dpy, this->win);
     } else if (!fullscreen && this->isfullscreen) {
         XChangeProperty(dpy, this->win, netatom[NetWMState], XA_ATOM, 32,
@@ -324,7 +323,7 @@ void Client::setfullscreen(int fullscreen) {
         this->y = this->oldy;
         this->w = this->oldw;
         this->h = this->oldh;
-        this->resizeclient(this->x, this->y, this->w, this->h);
+        this->resizeclient(this);
         this->mon->arrange();
     }
 }
@@ -348,7 +347,7 @@ void Client::showhide() {
         XMoveWindow(dpy, this->win, this->x, this->y);
         if ((!this->mon->lt[this->mon->sellt]->arrange || this->isfloating) &&
             !this->isfullscreen) {
-            this->resize(this->x, this->y, this->w, this->h, 0);
+            this->resize(*this, false);
         }
         if (this->snext) {
             this->snext->showhide();

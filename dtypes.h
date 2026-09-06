@@ -4,6 +4,7 @@
 #include "drw.h"
 #include "monitor.h"
 #include "prelude.h"
+#include "rect.h"
 #include "util.h"
 
 /* macros */
@@ -12,9 +13,6 @@
     (mask & ~(numlockmask | LockMask) &                                        \
      (ShiftMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask | Mod4Mask |    \
       Mod5Mask))
-#define INTERSECT(x, y, w, h, m)                                               \
-    (MAX(0, MIN((x) + (w), (m)->wx + (m)->ww) - MAX((x), (m)->wx)) *           \
-     MAX(0, MIN((y) + (h), (m)->wy + (m)->wh) - MAX((y), (m)->wy)))
 #define ISVISIBLE(C) ((C->tags & C->mon->tagset[C->mon->seltags]))
 #define MOUSEMASK (BUTTONMASK | PointerMotionMask)
 #define WIDTH(X) ((X)->w + 2 * (X)->bw)
@@ -124,7 +122,7 @@ static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
-static Monitor *recttomon(int x, int y, int w, int h);
+static Monitor *recttomon(const Rect *);
 static void resizemouse(const Arg *arg);
 static void run(void);
 static void scan(void);

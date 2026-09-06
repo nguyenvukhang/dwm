@@ -47,7 +47,7 @@ void buttonpress(XEvent *e) {
             arg.ui = 1 << i;
         } else if (ev->x < x + TEXTW(selmon->ltsymbol)) {
             click = ClkLtSymbol;
-        } else if (ev->x > selmon->ww - (int)TEXTW(stext) + lrpad - 2) {
+        } else if (ev->x > selmon->w.w - (int)TEXTW(stext) + lrpad - 2) {
             click = ClkStatusText;
         } else {
             click = ClkWinTitle;
@@ -161,10 +161,10 @@ void configurenotify(XEvent *e) {
             for (m = mons; m; m = m->next) {
                 for (c = m->clients; c; c = c->next) {
                     if (c->isfullscreen) {
-                        c->resizeclient(m->mx, m->my, m->mw, m->mh);
+                        c->resizeclient(&m->m);
                     }
                 }
-                XMoveResizeWindow(dpy, m->barwin, m->wx, m->by, m->ww, bh);
+                XMoveResizeWindow(dpy, m->barwin, m->w.x, m->by, m->w.w, bh);
             }
             focus(NULL);
             arrange();
@@ -185,11 +185,11 @@ void configurerequest(XEvent *e) {
             m = c->mon;
             if (ev->value_mask & CWX) {
                 c->oldx = c->x;
-                c->x = m->mx + ev->x;
+                c->x = m->m.x + ev->x;
             }
             if (ev->value_mask & CWY) {
                 c->oldy = c->y;
-                c->y = m->my + ev->y;
+                c->y = m->m.y + ev->y;
             }
             if (ev->value_mask & CWWidth) {
                 c->oldw = c->w;
@@ -199,13 +199,13 @@ void configurerequest(XEvent *e) {
                 c->oldh = c->h;
                 c->h = ev->height;
             }
-            if ((c->x + c->w) > m->mx + m->mw && c->isfloating) {
-                c->x = m->mx +
-                       (m->mw / 2 - WIDTH(c) / 2); /* center in x direction */
+            if ((c->x + c->w) > m->m.x + m->m.w && c->isfloating) {
+                c->x = m->m.x +
+                       (m->m.w / 2 - WIDTH(c) / 2); /* center in x direction */
             }
-            if ((c->y + c->h) > m->my + m->mh && c->isfloating) {
-                c->y = m->my +
-                       (m->mh / 2 - HEIGHT(c) / 2); /* center in y direction */
+            if ((c->y + c->h) > m->m.y + m->m.h && c->isfloating) {
+                c->y = m->m.y +
+                       (m->m.h / 2 - HEIGHT(c) / 2); /* center in y direction */
             }
             if ((ev->value_mask & (CWX | CWY)) &&
                 !(ev->value_mask & (CWWidth | CWHeight))) {
@@ -337,7 +337,7 @@ void focus(Client *c) {
     drawbars();
 }
 
-/* there are some broken focus acquiring clients needing extra handling */
+/// there are some broken focus acquiring clients needing extra handling
 void focusin(XEvent *e) {
     XFocusChangeEvent *ev = &e->xfocus;
 
@@ -532,14 +532,14 @@ void manage(Window w, XWindowAttributes *wa) {
         c->applyrules();
     }
 
-    if (c->x + WIDTH(c) > c->mon->wx + c->mon->ww) {
-        c->x = c->mon->wx + c->mon->ww - WIDTH(c);
+    if (c->x + WIDTH(c) > c->mon->w.x + c->mon->w.w) {
+        c->x = c->mon->w.x + c->mon->w.w - WIDTH(c);
     }
-    if (c->y + HEIGHT(c) > c->mon->wy + c->mon->wh) {
-        c->y = c->mon->wy + c->mon->wh - HEIGHT(c);
+    if (c->y + HEIGHT(c) > c->mon->w.y + c->mon->w.h) {
+        c->y = c->mon->w.y + c->mon->w.h - HEIGHT(c);
     }
-    c->x = MAX(c->x, c->mon->wx);
-    c->y = MAX(c->y, c->mon->wy);
+    c->x = MAX(c->x, c->mon->w.x);
+    c->y = MAX(c->y, c->mon->w.y);
     c->bw = borderpx;
 
     wc.border_width = c->bw;
@@ -611,7 +611,10 @@ void monocle(Monitor *m) {
         snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
     }
     for (c = m->clients->nexttiled(); c; c = c->next->nexttiled()) {
-        c->resize(m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
+        Rect r = m->w;
+        r.w = m->w.w - 2 * c->bw;
+        r.h = m->w.h - 2 * c->bw;
+        c->resize(r, 0);
     }
 }
 
@@ -623,7 +626,8 @@ void motionnotify(XEvent *e) {
     if (ev->window != root) {
         return;
     }
-    if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon && mon) {
+    const Rect r{.x = ev->x_root, .y = ev->y_root, .w = 1, .h = 1};
+    if ((m = recttomon(&r)) != mon && mon) {
         if (selmon->sel) {
             selmon->sel->unfocus(1);
         }
@@ -673,30 +677,30 @@ void movemouse(const Arg *arg) {
 
             nx = ocx + (ev.xmotion.x - x);
             ny = ocy + (ev.xmotion.y - y);
-            if (abs(selmon->wx - nx) < snap) {
-                nx = selmon->wx;
-            } else if (abs((selmon->wx + selmon->ww) - (nx + WIDTH(c))) <
+            if (abs(selmon->w.x - nx) < snap) {
+                nx = selmon->w.x;
+            } else if (abs((selmon->w.x + selmon->w.w) - (nx + WIDTH(c))) <
                        snap) {
-                nx = selmon->wx + selmon->ww - WIDTH(c);
+                nx = selmon->w.x + selmon->w.w - WIDTH(c);
             }
-            if (abs(selmon->wy - ny) < snap) {
-                ny = selmon->wy;
-            } else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) <
+            if (abs(selmon->w.y - ny) < snap) {
+                ny = selmon->w.y;
+            } else if (abs((selmon->w.y + selmon->w.h) - (ny + HEIGHT(c))) <
                        snap) {
-                ny = selmon->wy + selmon->wh - HEIGHT(c);
+                ny = selmon->w.y + selmon->w.h - HEIGHT(c);
             }
             if (!c->isfloating && selmon->lt[selmon->sellt]->arrange &&
                 (abs(nx - c->x) > snap || abs(ny - c->y) > snap)) {
                 togglefloating(NULL);
             }
             if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
-                c->resize(nx, ny, c->w, c->h, 1);
+                c->resize({.x = nx, .y = ny, .w = c->w, .h = c->h}, 1);
             }
             break;
         }
     } while (ev.type != ButtonRelease);
     XUngrabPointer(dpy, CurrentTime);
-    if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
+    if ((m = recttomon(c)) != selmon) {
         c->sendmon(m);
         selmon = m;
         focus(NULL);
@@ -744,17 +748,17 @@ void propertynotify(XEvent *e) {
 
 void quit(const Arg *arg) { running = 0; }
 
-Monitor *recttomon(int x, int y, int w, int h) {
-    Monitor *m, *r = selmon;
+Monitor *recttomon(const Rect *r) {
+    Monitor *m, *ret = selmon;
     int a, area = 0;
 
     for (m = mons; m; m = m->next) {
-        if ((a = INTERSECT(x, y, w, h, m)) > area) {
+        if ((a = r->intersect(m->w)) > area) {
             area = a;
-            r = m;
+            ret = m;
         }
     }
-    return r;
+    return ret;
 }
 
 void resizemouse(const Arg *arg) {
@@ -796,17 +800,17 @@ void resizemouse(const Arg *arg) {
 
             nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
             nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
-            if (c->mon->wx + nw >= selmon->wx &&
-                c->mon->wx + nw <= selmon->wx + selmon->ww &&
-                c->mon->wy + nh >= selmon->wy &&
-                c->mon->wy + nh <= selmon->wy + selmon->wh) {
+            if (c->mon->w.x + nw >= selmon->w.x &&
+                c->mon->w.x + nw <= selmon->w.x + selmon->w.w &&
+                c->mon->w.y + nh >= selmon->w.y &&
+                c->mon->w.y + nh <= selmon->w.y + selmon->w.h) {
                 if (!c->isfloating && selmon->lt[selmon->sellt]->arrange &&
                     (abs(nw - c->w) > snap || abs(nh - c->h) > snap)) {
                     togglefloating(NULL);
                 }
             }
             if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
-                c->resize(c->x, c->y, nw, nh, 1);
+                c->resize({.x = c->x, .y = c->y, .w = nw, .h = nh}, 1);
             }
             break;
         }
@@ -815,7 +819,7 @@ void resizemouse(const Arg *arg) {
                  c->h + c->bw - 1);
     XUngrabPointer(dpy, CurrentTime);
     while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
-    if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
+    if ((m = recttomon(c)) != selmon) {
         c->sendmon(m);
         selmon = m;
         focus(NULL);
@@ -1038,23 +1042,30 @@ void tile(Monitor *m) {
     }
 
     if (n > m->nmaster) {
-        mw = m->nmaster ? m->ww * m->mfact : 0;
+        mw = m->nmaster ? m->w.w * m->mfact : 0;
     } else {
-        mw = m->ww;
+        mw = m->w.w;
     }
     for (i = my = ty = 0, c = m->clients->nexttiled(); c;
          c = c->next->nexttiled(), i++) {
         if (i < m->nmaster) {
-            h = (m->wh - my) / (MIN(n, m->nmaster) - i);
-            c->resize(m->wx, m->wy + my, mw - (2 * c->bw), h - (2 * c->bw), 0);
-            if (my + HEIGHT(c) < m->wh) {
+            h = (m->w.h - my) / (MIN(n, m->nmaster) - i);
+            c->resize({.x = m->w.x,
+                       .y = m->w.y + (int)my,
+                       .w = (int)mw - (2 * c->bw),
+                       .h = (int)h - (2 * c->bw)},
+                      0);
+            if (my + HEIGHT(c) < m->w.h) {
                 my += HEIGHT(c);
             }
         } else {
-            h = (m->wh - ty) / (n - i);
-            c->resize(m->wx + mw, m->wy + ty, m->ww - mw - (2 * c->bw),
-                      h - (2 * c->bw), 0);
-            if (ty + HEIGHT(c) < m->wh) {
+            h = (m->w.h - ty) / (n - i);
+            c->resize({.x = m->w.x + (int)mw,
+                       .y = m->w.y + (int)ty,
+                       .w = m->w.w - (int)mw - (2 * c->bw),
+                       .h = (int)h - (2 * c->bw)},
+                      0);
+            if (ty + HEIGHT(c) < m->w.h) {
                 ty += HEIGHT(c);
             }
         }
@@ -1064,7 +1075,7 @@ void tile(Monitor *m) {
 void togglebar(const Arg *arg) {
     selmon->showbar = !selmon->showbar;
     selmon->updatebarpos();
-    XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww,
+    XMoveResizeWindow(dpy, selmon->barwin, selmon->w.x, selmon->by, selmon->w.w,
                       bh);
     selmon->arrange();
 }
@@ -1078,8 +1089,7 @@ void togglefloating(const Arg *arg) {
     }
     selmon->sel->isfloating = !selmon->sel->isfloating || selmon->sel->isfixed;
     if (selmon->sel->isfloating) {
-        selmon->sel->resize(selmon->sel->x, selmon->sel->y, selmon->sel->w,
-                            selmon->sel->h, 0);
+        selmon->sel->resize(*selmon->sel, 0);
     }
     selmon->arrange();
 }
@@ -1134,7 +1144,7 @@ void updatebars(void) {
             continue;
         }
         m->barwin = XCreateWindow(
-            dpy, root, m->wx, m->by, m->ww, bh, 0, DefaultDepth(dpy, screen),
+            dpy, root, m->w.x, m->by, m->w.w, bh, 0, DefaultDepth(dpy, screen),
             CopyFromParent, DefaultVisual(dpy, screen),
             CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
         XDefineCursor(dpy, m->barwin, *cursor[CurNormal]);
@@ -1162,10 +1172,10 @@ int updategeom(void) {
         if (!mons) {
             mons = createmon();
         }
-        if (mons->mw != sw || mons->mh != sh) {
+        if (mons->m.w != sw || mons->m.h != sh) {
             dirty = 1;
-            mons->mw = mons->ww = sw;
-            mons->mh = mons->wh = sh;
+            mons->m.w = mons->w.w = sw;
+            mons->m.h = mons->w.h = sh;
             mons->updatebarpos();
         }
     }
@@ -1232,7 +1242,8 @@ Monitor *wintomon(Window w) {
     Monitor *m;
 
     if (w == root && getrootptr(&x, &y)) {
-        return recttomon(x, y, 1, 1);
+        const Rect r{.x = x, .y = y, .w = 1, .h = 1};
+        return recttomon(&r);
     }
     for (m = mons; m; m = m->next) {
         if (w == m->barwin) {

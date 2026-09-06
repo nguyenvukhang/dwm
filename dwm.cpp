@@ -200,12 +200,14 @@ void configurerequest(XEvent *e) {
                 c->h = ev->height;
             }
             if ((c->x + c->w) > m->m.x + m->m.w && c->isfloating) {
-                c->x = m->m.x +
-                       (m->m.w / 2 - WIDTH(c) / 2); /* center in x direction */
+                c->x =
+                    m->m.x + (m->m.w / 2 - c->effective_width() /
+                                               2); /* center in x direction */
             }
             if ((c->y + c->h) > m->m.y + m->m.h && c->isfloating) {
-                c->y = m->m.y +
-                       (m->m.h / 2 - HEIGHT(c) / 2); /* center in y direction */
+                c->y =
+                    m->m.y + (m->m.h / 2 - c->effective_height() /
+                                               2); /* center in y direction */
             }
             if ((ev->value_mask & (CWX | CWY)) &&
                 !(ev->value_mask & (CWWidth | CWHeight))) {
@@ -532,11 +534,11 @@ void manage(Window w, XWindowAttributes *wa) {
         c->applyrules();
     }
 
-    if (c->x + WIDTH(c) > c->mon->w.x + c->mon->w.w) {
-        c->x = c->mon->w.x + c->mon->w.w - WIDTH(c);
+    if (c->x + c->effective_width() > c->mon->w.x + c->mon->w.w) {
+        c->x = c->mon->w.x + c->mon->w.w - c->effective_width();
     }
-    if (c->y + HEIGHT(c) > c->mon->w.y + c->mon->w.h) {
-        c->y = c->mon->w.y + c->mon->w.h - HEIGHT(c);
+    if (c->y + c->effective_height() > c->mon->w.y + c->mon->w.h) {
+        c->y = c->mon->w.y + c->mon->w.h - c->effective_height();
     }
     c->x = MAX(c->x, c->mon->w.x);
     c->y = MAX(c->y, c->mon->w.y);
@@ -679,15 +681,15 @@ void movemouse(const Arg *arg) {
             ny = ocy + (ev.xmotion.y - y);
             if (abs(selmon->w.x - nx) < snap) {
                 nx = selmon->w.x;
-            } else if (abs((selmon->w.x + selmon->w.w) - (nx + WIDTH(c))) <
-                       snap) {
-                nx = selmon->w.x + selmon->w.w - WIDTH(c);
+            } else if (abs((selmon->w.x + selmon->w.w) -
+                           (nx + c->effective_width())) < snap) {
+                nx = selmon->w.x + selmon->w.w - c->effective_width();
             }
             if (abs(selmon->w.y - ny) < snap) {
                 ny = selmon->w.y;
-            } else if (abs((selmon->w.y + selmon->w.h) - (ny + HEIGHT(c))) <
-                       snap) {
-                ny = selmon->w.y + selmon->w.h - HEIGHT(c);
+            } else if (abs((selmon->w.y + selmon->w.h) -
+                           (ny + c->effective_height())) < snap) {
+                ny = selmon->w.y + selmon->w.h - c->effective_height();
             }
             if (!c->isfloating && selmon->lt[selmon->sellt]->arrange &&
                 (abs(nx - c->x) > snap || abs(ny - c->y) > snap)) {
@@ -1055,8 +1057,8 @@ void tile(Monitor *m) {
                        .w = (int)mw - (2 * c->bw),
                        .h = (int)h - (2 * c->bw)},
                       0);
-            if (my + HEIGHT(c) < m->w.h) {
-                my += HEIGHT(c);
+            if (my + c->effective_height() < m->w.h) {
+                my += c->effective_height();
             }
         } else {
             h = (m->w.h - ty) / (n - i);
@@ -1065,8 +1067,8 @@ void tile(Monitor *m) {
                        .w = m->w.w - (int)mw - (2 * c->bw),
                        .h = (int)h - (2 * c->bw)},
                       0);
-            if (ty + HEIGHT(c) < m->w.h) {
-                ty += HEIGHT(c);
+            if (ty + c->effective_height() < m->w.h) {
+                ty += c->effective_height();
             }
         }
     }

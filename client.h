@@ -19,7 +19,7 @@ struct SizeHinted {
     float mina;
 };
 
-struct Client : private SizeHinted, Rect {
+struct Client : private SizeHinted, public Rect {
     char name[256];
 
     int oldx, oldy, oldw, oldh;
@@ -79,4 +79,9 @@ struct Client : private SizeHinted, Rect {
     void updatetitle();
     void updatewindowtype();
     void updatewmhints();
+
+    /// The width of this window including the border.
+    int effective_width() const;
+    /// The height of this window including the border.
+    int effective_height() const;
 };

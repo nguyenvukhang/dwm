@@ -46,10 +46,10 @@ bool Client::applysizehints(Rect &rect, int interact) {
     rect.h = MAX(1, rect.h);
     if (interact) {
         if (rect.x > sw) {
-            rect.x = sw - WIDTH(this);
+            rect.x = sw - this->effective_width();
         }
         if (rect.y > sh) {
-            rect.y = sh - HEIGHT(this);
+            rect.y = sh - this->effective_height();
         }
         if (rect.x + rect.w + 2 * this->bw < 0) {
             rect.x = 0;
@@ -59,10 +59,10 @@ bool Client::applysizehints(Rect &rect, int interact) {
         }
     } else {
         if (rect.x >= m->w.x + m->w.w) {
-            rect.x = m->w.x + m->w.w - WIDTH(this);
+            rect.x = m->w.x + m->w.w - this->effective_width();
         }
         if (rect.y >= m->w.y + m->w.h) {
-            rect.y = m->w.y + m->w.h - HEIGHT(this);
+            rect.y = m->w.y + m->w.h - this->effective_height();
         }
         if (rect.x + rect.w + 2 * this->bw <= m->w.x) {
             rect.x = m->w.x;
@@ -357,7 +357,7 @@ void Client::showhide() {
         if (this->snext) {
             this->snext->showhide();
         }
-        XMoveWindow(dpy, this->win, WIDTH(this) * -2, this->y);
+        XMoveWindow(dpy, this->win, this->effective_width() * -2, this->y);
     }
 }
 
@@ -484,3 +484,7 @@ void Client::updatewmhints() {
         XFree(wmh);
     }
 }
+
+int Client::effective_width() const { return this->w + 2 * this->bw; }
+
+int Client::effective_height() const { return this->h + 2 * this->bw; }

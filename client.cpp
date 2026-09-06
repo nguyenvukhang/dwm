@@ -83,10 +83,10 @@ int Client::applysizehints(int *x, int *y, int *w, int *h, int interact) {
             this->updatesizehints();
         }
         /* see last two sentences in ICCCM 4.1.2.3 */
-        baseismin = this->basew == this->minw && this->baseh == this->minh;
+        baseismin = this->base == this->min;
         if (!baseismin) { /* temporarily remove base dimensions */
-            *w -= this->basew;
-            *h -= this->baseh;
+            *w -= this->base.w;
+            *h -= this->base.h;
         }
         /* adjust for aspect limits */
         if (this->mina > 0 && this->maxa > 0) {
@@ -97,24 +97,24 @@ int Client::applysizehints(int *x, int *y, int *w, int *h, int interact) {
             }
         }
         if (baseismin) { /* increment calculation requires this */
-            *w -= this->basew;
-            *h -= this->baseh;
+            *w -= this->base.w;
+            *h -= this->base.h;
         }
         /* adjust for increment value */
-        if (this->incw) {
-            *w -= *w % this->incw;
+        if (this->inc.w) {
+            *w -= *w % this->inc.w;
         }
-        if (this->inch) {
-            *h -= *h % this->inch;
+        if (this->inc.h) {
+            *h -= *h % this->inc.h;
         }
         /* restore base dimensions */
-        *w = MAX(*w + this->basew, this->minw);
-        *h = MAX(*h + this->baseh, this->minh);
-        if (this->maxw) {
-            *w = MIN(*w, this->maxw);
+        *w = MAX(*w + this->base.w, this->min.w);
+        *h = MAX(*h + this->base.h, this->min.h);
+        if (this->max.w) {
+            *w = MIN(*w, this->max.w);
         }
-        if (this->maxh) {
-            *h = MIN(*h, this->maxh);
+        if (this->max.h) {
+            *h = MIN(*h, this->max.h);
         }
     }
     return *x != this->x || *y != this->y || *w != this->w || *h != this->h;
@@ -405,34 +405,34 @@ void Client::updatesizehints() {
         size.flags = PSize;
     }
     if (size.flags & PBaseSize) {
-        this->basew = size.base_width;
-        this->baseh = size.base_height;
+        this->base.w = size.base_width;
+        this->base.h = size.base_height;
     } else if (size.flags & PMinSize) {
-        this->basew = size.min_width;
-        this->baseh = size.min_height;
+        this->base.w = size.min_width;
+        this->base.h = size.min_height;
     } else {
-        this->basew = this->baseh = 0;
+        this->base.w = this->base.h = 0;
     }
     if (size.flags & PResizeInc) {
-        this->incw = size.width_inc;
-        this->inch = size.height_inc;
+        this->inc.w = size.width_inc;
+        this->inc.h = size.height_inc;
     } else {
-        this->incw = this->inch = 0;
+        this->inc.w = this->inc.h = 0;
     }
     if (size.flags & PMaxSize) {
-        this->maxw = size.max_width;
-        this->maxh = size.max_height;
+        this->max.w = size.max_width;
+        this->max.h = size.max_height;
     } else {
-        this->maxw = this->maxh = 0;
+        this->max.w = this->max.h = 0;
     }
     if (size.flags & PMinSize) {
-        this->minw = size.min_width;
-        this->minh = size.min_height;
+        this->min.w = size.min_width;
+        this->min.h = size.min_height;
     } else if (size.flags & PBaseSize) {
-        this->minw = size.base_width;
-        this->minh = size.base_height;
+        this->min.w = size.base_width;
+        this->min.h = size.base_height;
     } else {
-        this->minw = this->minh = 0;
+        this->min.w = this->min.h = 0;
     }
     if (size.flags & PAspect) {
         this->mina = (float)size.min_aspect.y / size.min_aspect.x;
@@ -440,8 +440,8 @@ void Client::updatesizehints() {
     } else {
         this->maxa = this->mina = 0.0;
     }
-    this->isfixed = (this->maxw && this->maxh && this->maxw == this->minw &&
-                     this->maxh == this->minh);
+    this->isfixed = (this->max.w && this->max.h && this->max.w == this->min.w &&
+                     this->max.h == this->min.h);
     this->hintsvalid = 1;
 }
 

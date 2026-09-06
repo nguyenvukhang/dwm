@@ -1,15 +1,30 @@
 #pragma once
 
+#include "rect.h"
 #include <X11/Xlib.h>
 
 struct Monitor;
 
-struct Client {
+struct SizeHinted {
+    Size base;
+    /// Incremental size when resizing.
+    Size inc;
+    Size max;
+    Size min;
+    /// Maximum aspect ratio (width / height).
+    float maxa;
+    /// Minimum aspect ratio (height / width).
+    /// Note that this is the reciprocal of the conventional notion of the
+    /// aspect ratio because of how we'll be using it.
+    float mina;
+};
+
+struct Client : private SizeHinted {
     char name[256];
-    float mina, maxa;
+
     int x, y, w, h;
     int oldx, oldy, oldw, oldh;
-    int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
+    int hintsvalid;
     /* Border width. */
     int bw;
     /* Old border width. */

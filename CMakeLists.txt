@@ -5,7 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_FLAGS "-O3")
 set(CMAKE_INSTALL_PREFIX /usr/local)
 
-add_executable(dwm dwm.cpp drw.cpp util.cpp)
+add_executable(dwm dwm.cpp drw.cpp util.cpp rect.cpp)
 
 set_property(TARGET dwm PROPERTY CXX_STANDARD 20)
 

@@ -22,7 +22,7 @@ struct SizeHinted {
 struct Client : private SizeHinted, public Rect {
     char name[256];
 
-    int oldx, oldy, oldw, oldh;
+    Rect old;
     int hintsvalid;
     /// Border width.
     int bw;

@@ -184,19 +184,19 @@ void configurerequest(XEvent *e) {
         } else if (c->isfloating || !selmon->lt[selmon->sellt]->arrange) {
             m = c->mon;
             if (ev->value_mask & CWX) {
-                c->oldx = c->x;
+                c->old.x = c->x;
                 c->x = m->m.x + ev->x;
             }
             if (ev->value_mask & CWY) {
-                c->oldy = c->y;
+                c->old.y = c->y;
                 c->y = m->m.y + ev->y;
             }
             if (ev->value_mask & CWWidth) {
-                c->oldw = c->w;
+                c->old.w = c->w;
                 c->w = ev->width;
             }
             if (ev->value_mask & CWHeight) {
-                c->oldh = c->h;
+                c->old.h = c->h;
                 c->h = ev->height;
             }
             if ((c->x + c->w) > m->m.x + m->m.w && c->isfloating) {
@@ -519,10 +519,10 @@ void manage(Window w, XWindowAttributes *wa) {
     c = (Client *)ecalloc(1, sizeof(Client));
     c->win = w;
     /* geometry */
-    c->x = c->oldx = wa->x;
-    c->y = c->oldy = wa->y;
-    c->w = c->oldw = wa->width;
-    c->h = c->oldh = wa->height;
+    c->x = c->old.x = wa->x;
+    c->y = c->old.y = wa->y;
+    c->w = c->old.w = wa->width;
+    c->h = c->old.h = wa->height;
     c->oldbw = wa->border_width;
 
     c->updatetitle();

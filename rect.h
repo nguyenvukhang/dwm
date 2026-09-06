@@ -1,5 +1,8 @@
 #pragma once
+
 #include "util.h"
+
+#include <X11/Xlib.h>
 
 struct Size {
     int w, h;
@@ -16,16 +19,8 @@ struct Rect {
     // Height. Guaranteed to be non-negative.
     int h;
 
+    bool equals(const Rect *o) const;
     /// Get the area of intersection. Always returns a non-negative value.
-    int intersect(const Rect &o) const {
-        const int width = MIN(x + w, o.x + o.w) - MAX(x, o.x);
-        const int height = MIN(y + h, o.y + o.h) - MAX(y, o.y);
-        // At this point, both `width` and `height` are guaranteed to be
-        // non-negative.
-        return MAX(0, width) * MAX(0, height);
-    }
-
-    bool equals(const Rect *o) const {
-        return x == o->x && y == o->y && w == o->w && h == o->h;
-    }
+    int intersect(const Rect &o) const;
+    void take_rect_value(const Rect *other);
 };

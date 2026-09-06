@@ -226,17 +226,15 @@ void Client::resize(Rect rect, bool interact) {
 }
 
 void Client::resizeclient(const Rect *r) {
-    XWindowChanges wc;
-
-    this->oldx = this->x;
-    this->x = wc.x = r->x;
-    this->oldy = this->y;
-    this->y = wc.y = r->y;
-    this->oldw = this->w;
-    this->w = wc.width = r->w;
-    this->oldh = this->h;
-    this->h = wc.height = r->h;
-    wc.border_width = this->bw;
+    this->old.take_rect_value(this);
+    this->take_rect_value(r);
+    XWindowChanges wc{
+        .x = r->x,
+        .y = r->y,
+        .width = r->w,
+        .height = r->h,
+        .border_width = this->bw,
+    };
     XConfigureWindow(dpy, this->win,
                      CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
     this->configure();
@@ -319,10 +317,7 @@ void Client::setfullscreen(int fullscreen) {
         this->isfullscreen = 0;
         this->isfloating = this->oldstate;
         this->bw = this->oldbw;
-        this->x = this->oldx;
-        this->y = this->oldy;
-        this->w = this->oldw;
-        this->h = this->oldh;
+        this->take_rect_value(&this->old);
         this->resizeclient(this);
         this->mon->arrange();
     }
